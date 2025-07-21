@@ -1,0 +1,147 @@
+#!/bin/bash
+set -e
+
+web_only=false
+dotnet_only=false
+skip_tests=true  # Skip tests by default for faster builds
+skip_web_tests=true
+skip_dotnet_tests=true
+parallel_builds=true
+use_cache=true
+
+while test $# -gt 0; do
+  case "$1" in
+    -h|--help)
+      echo 'options:'
+      echo '-h, --help          show help'
+      echo '--web-only          skip dotnet build'
+      echo '--dotnet-only       skip web build'
+      echo '--run-tests         run tests (slower)'
+      echo '--no-cache          disable caching'
+      echo '--no-parallel       disable parallel builds'
+      echo '--version           version for the binary. defaults to current git tag+SHA'
+      exit 0
+      ;;
+    --web-only)
+      web_only=true
+      shift
+      ;;
+    --dotnet-only)
+      dotnet_only=true
+      shift
+      ;;
+    --run-tests)
+      skip_tests=false
+      skip_web_tests=false
+      skip_dotnet_tests=false
+      shift
+      ;;
+    --no-cache)
+      use_cache=false
+      shift
+      ;;
+    --no-parallel)
+      parallel_builds=false
+      shift
+      ;;
+    --version)
+      shift
+      version=$1
+      shift
+      ;;
+    *)
+      break
+      ;;
+  esac
+done
+
+if [ -z "$version" ]; then 
+  tag=$(git describe --tags --abbrev=0 2>/dev/null || echo "0.0.1")
+  sha=$(git rev-parse --short HEAD 2>/dev/null || echo "local")
+  version=$tag+$sha
+fi
+
+echo "🚀 Fast Build Mode - Version: $version"
+if [ "$skip_tests" = true ]; then
+  echo "   Tests: SKIPPED"
+else
+  echo "   Tests: ENABLED"
+fi
+if [ "$use_cache" = true ]; then
+  echo "   Cache: ENABLED"
+else
+  echo "   Cache: DISABLED"
+fi
+if [ "$parallel_builds" = true ]; then
+  echo "   Parallel: ENABLED"
+else
+  echo "   Parallel: DISABLED"
+fi
+
+# Set environment variables for faster builds
+export NODE_ENV=production
+export DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
+export DOTNET_CLI_TELEMETRY_OPTOUT=1
+export NUGET_XMLDOC_MODE=skip
+
+# Web build optimization
+if [ "$dotnet_only" = false ]; then
+  echo $'\n🌐 Building Web Frontend...'
+  cd src/web
+  
+  # Use npm ci with cache if available
+  if [ "$use_cache" = true ] && [ -d "node_modules" ]; then
+    echo "📦 Using existing node_modules (cache hit)"
+  else
+    echo "📦 Installing dependencies..."
+    npm ci --prefer-offline --no-audit --no-fund
+  fi
+
+  # Skip tests for faster builds unless explicitly requested
+  if [ "$skip_web_tests" = false ]; then
+    echo "🧪 Running web tests..."
+    NODE_NO_WARNINGS=1 npm run test-unattended
+  else
+    echo "⏩ Web tests skipped (use --run-tests to enable)"
+  fi
+
+  # Optimized build with production settings
+  echo "🔨 Building web assets..."
+  NODE_NO_WARNINGS=1 npm run build
+  
+  if [ "$web_only" = false ]; then
+    # Optimize copy operation
+    rm -rf ../slskd/wwwroot
+    mkdir -p ../slskd/wwwroot
+    cp -r build/* ../slskd/wwwroot/
+  fi
+  
+  cd ../..
+fi
+
+# .NET build optimization
+if [ "$web_only" = false ]; then
+  echo $'\n🔧 Building .NET Backend...'
+  cd src/slskd
+
+  # Use incremental build for faster compilation
+  echo "🔨 Building .NET application..."
+  if [ "$parallel_builds" = true ]; then
+    dotnet build --configuration Release -p:Version=$version -p:MaxCpuCount=0
+  else
+    dotnet build --configuration Release -p:Version=$version
+  fi
+
+  # Skip tests for faster builds unless explicitly requested
+  if [ "$skip_dotnet_tests" = false ]; then
+    echo "🧪 Running .NET tests..."
+    dotnet test --configuration Release ../../tests/slskd.Tests.Unit --no-build
+    dotnet test --configuration Release ../../tests/slskd.Tests.Integration --no-build
+  else
+    echo "⏩ .NET tests skipped (use --run-tests to enable)"
+  fi
+fi
+
+echo $'\n✅ Fast build completed successfully!'
+echo "   Build time optimized for development speed"
+echo "   Use --run-tests for full test suite" 

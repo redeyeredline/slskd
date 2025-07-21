@@ -1,0 +1,46 @@
+version: "3.8"
+
+services:
+  slskd:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        VERSION: 0.0.1.65534-local
+        TARGETPLATFORM: linux/amd64
+    container_name: slskd
+    restart: unless-stopped
+    environment:
+      - SLSKD_REMOTE_CONFIGURATION=true
+      - SLSKD_HTTP_PORT=5030
+      - SLSKD_HTTPS_PORT=5031
+      - SLSKD_SLSK_LISTEN_PORT=50300
+      - SLSKD_APP_DIR=/app
+      # Enable local IP bypass for Docker
+      - SLSKD_LOCAL_IP_BYPASS=true
+      - SLSKD_LOCAL_IP_BYPASS_CIDR=192.168.0.0/24
+      - SLSKD_LOCAL_IP_BYPASS_ROLE=Administrator
+      # Uncomment and modify the line below if you want to share directories
+      # - SLSKD_SHARED_DIR=/music;/ebooks
+    ports:
+      - "5030:5030/tcp"   # HTTP web interface
+      - "5031:5031/tcp"   # HTTPS web interface
+      - "50300:50300/tcp" # Soulseek network port
+    volumes:
+      - /opt/dockerdata/slskd-enhanced:/app
+      # Uncomment and modify the lines below if you want to share directories
+      # - /path/to/your/music:/music:rw
+      # - /path/to/your/ebooks:/ebooks:rw
+    user: "1000:1000"  # Change to your user ID if needed
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "-", "http://localhost:5030/health"]
+      interval: 60s
+      timeout: 3s
+      retries: 3
+      start_period: 60m
+    networks:
+      - slskd-network
+
+networks:
+  slskd-network:
+    driver: bridge 
