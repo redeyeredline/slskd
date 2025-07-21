@@ -111,6 +111,9 @@ class TransferList extends Component {
                     <Table.HeaderCell className="transferlist-progress">
                       Progress
                     </Table.HeaderCell>
+                    <Table.HeaderCell className="transferlist-queue-position">
+                      Queue Position
+                    </Table.HeaderCell>
                     <Table.HeaderCell className="transferlist-size">
                       Size
                     </Table.HeaderCell>
@@ -170,6 +173,9 @@ class TransferList extends Component {
                               {f.placeInQueue ? ` (#${f.placeInQueue})` : ''}
                             </Button>
                           )}
+                        </Table.Cell>
+                        <Table.Cell className="transferlist-queue-position">
+                          {isQueuedState(f.state) ? f.placeInQueue ?? '—' : '—'}
                         </Table.Cell>
                         <Table.Cell className="transferlist-size">
                           {formatBytesTransferred({

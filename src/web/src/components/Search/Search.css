@@ -18,7 +18,7 @@
 
 .search-segment-icon {
   padding-top: 10px;
-  padding-right: .5em;
+  padding-right: 0.5em;
 }
 
 .search-card {
@@ -28,8 +28,10 @@
 }
 
 @media only screen and (min-width: 991px) {
-  .search-options-hide-no-slots, .search-options-hide-locked, .search-options-fold-results {
-      margin-left: 1rem;
+  .search-options-hide-no-slots,
+  .search-options-hide-locked,
+  .search-options-fold-results {
+    margin-left: 1rem;
   }
 
   .search-option-toggles {
@@ -39,7 +41,7 @@
 
 @media only screen and (max-width: 684px) {
   .search-options-sort {
-      width: 100%;
+    width: 100%;
   }
 }
 
@@ -48,7 +50,8 @@
     margin-top: 1rem;
   }
 
-  .search-options-hide-no-slots, .search-options-fold-results {
+  .search-options-hide-no-slots,
+  .search-options-fold-results {
     margin-left: 1rem;
   }
 }
@@ -58,7 +61,8 @@
     display: grid;
   }
 
-  .search-options-hide-no-slots, .search-options-fold-results {
+  .search-options-hide-no-slots,
+  .search-options-fold-results {
     margin-top: 1rem;
     margin-left: 0px;
   }

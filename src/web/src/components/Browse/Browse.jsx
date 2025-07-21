@@ -493,7 +493,13 @@ class Browse extends Component {
       <div className="search-container">
         <Segment
           className="browse-segment"
-          raised
+          style={{
+            background: '#181a1b',
+            border: '1px solid #333',
+            borderRadius: '10px',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+            marginBottom: '20px',
+          }}
         >
           <div className="browse-segment-icon">
             <Icon
@@ -568,16 +574,34 @@ class Browse extends Component {
                 </Button>
               </div>
             ) : (
-              <div className="browse-container">
+              <div className="browse-container" style={{
+                background: '#181a1b',
+                border: '1px solid #333',
+                borderRadius: '10px',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                padding: '16px',
+              }}>
                 {emptyTree ? (
-                  <PlaceholderSegment
-                    caption="No user share to display"
-                    icon="folder open"
-                  />
+                  <div style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#666',
+                    padding: '40px 0',
+                  }}>
+                    <Icon name="folder open" size="huge" style={{ marginBottom: 16, color: '#444' }} />
+                    <div style={{ fontSize: '1.2em' }}>No user share to display</div>
+                  </div>
                 ) : (
                   <Card
                     className="browse-tree-card"
-                    raised
+                    style={{
+                      background: '#181a1b',
+                      border: '1px solid #333',
+                      borderRadius: '10px',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                    }}
                   >
                     <Card.Content>
                       <Card.Header>
@@ -593,7 +617,12 @@ class Browse extends Component {
                           {/* eslint-disable-line max-len */}
                         </span>
                       </Card.Meta>
-                      <Segment className="browse-folderlist">
+                      <Segment className="browse-folderlist" style={{
+                        background: '#181a1b',
+                        border: '1px solid #333',
+                        borderRadius: '10px',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                      }}>
                         <DirectoryTree
                           onSelect={(_, value) => this.selectDirectory(value)}
                           selectedDirectoryName={name}

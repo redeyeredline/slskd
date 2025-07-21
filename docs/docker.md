@@ -4,9 +4,9 @@ You'll need to [install Docker](https://docs.docker.com/get-docker/) first.
 
 Next, you'll need to make a few choices:
 
-* The HTTP and/or HTTPS ports for the slskd web UI (defaults 5030 and 5031)
-* The port for incoming connections from the Soulseek network (default 50300)
-* The directory for the slskd application data
+- The HTTP and/or HTTPS ports for the slskd web UI (defaults 5030 and 5031)
+- The port for incoming connections from the Soulseek network (default 50300)
+- The directory for the slskd application data
 
 For most users, a quick start will be all that is needed:
 
@@ -24,8 +24,7 @@ This configuration, however, doesn't include any shared directories.
 
 First, you need to map each share to the container as a volume. Then each local directory within the container needs to be added to the configuration. You may also need to specify the user and group ID that should run the container and own files created by slskd. The default is `root:root`, but Docker will accept any numeric values in the `UID:GID` format, such as `1000:1000` in this example.
 
-In the following example, assume that the slskd application directory will be `/var/slskd` on the docker host. Assume that the directories `/home/JohnDoe/Music` and `/home/JohnDoe/eBooks` will be shared. 
-
+In the following example, assume that the slskd application directory will be `/var/slskd` on the docker host. Assume that the directories `/home/JohnDoe/Music` and `/home/JohnDoe/eBooks` will be shared.
 
 For this scenario, the `docker run` command would be:
 
@@ -62,6 +61,7 @@ services:
     user: 1000:1000
     image: slskd/slskd:latest
 ```
+
 The YAML configuration file would contain:
 
 ```yaml

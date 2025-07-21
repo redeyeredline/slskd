@@ -36,7 +36,7 @@
 
 .chat-segment-icon {
   padding-top: 10px;
-  padding-right: .5em;
+  padding-right: 0.5em;
 }
 
 .conversation-menu {
@@ -60,10 +60,10 @@
   border-top-left-radius: 0%;
   border-bottom-left-radius: 0%;
   border-radius: 0%;
-} 
+}
 
 .chat-history {
-  padding: .5em .5em 0 .5em !important;
+  padding: 0.5em 0.5em 0 0.5em !important;
   overflow-y: auto;
   overscroll-behavior-y: contain;
   scroll-snap-type: y proximity;
@@ -73,7 +73,7 @@
 
 .chat-history > .list {
   align-self: end;
-  margin-bottom: .5em !important;
+  margin-bottom: 0.5em !important;
 }
 
 .chat-active-card {
@@ -85,8 +85,8 @@
 }
 
 .chat-message-time {
-  float:right;
-  opacity: .65;
+  float: right;
+  opacity: 0.65;
   font-size: smaller;
   font-variant: small-caps;
   font-style: italic;
@@ -106,7 +106,7 @@
 }
 
 #chat-history-scroll-anchor {
-  scroll-snap-align: start
+  scroll-snap-align: start;
 }
 
 /* semantic-ui-react colors the border of inputs
@@ -115,5 +115,5 @@
    this had to be added to an id to override the class
    declaration. */
 #chat-message-input {
-    border-right-color: transparent !important;
+  border-right-color: transparent !important;
 }

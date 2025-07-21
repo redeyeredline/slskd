@@ -21,7 +21,7 @@
 
 .rooms-segment-icon {
   padding-top: 10px;
-  padding-right: .5em;
+  padding-right: 0.5em;
 }
 
 .room-menu {
@@ -76,7 +76,7 @@
 }
 
 .room-history {
-  padding: .5em .5em 0 .5em !important;
+  padding: 0.5em 0.5em 0 0.5em !important;
   overflow-y: auto;
   overscroll-behavior-y: contain;
   scroll-snap-type: y proximity;
@@ -86,7 +86,7 @@
 
 .room-history > .list {
   align-self: end;
-  margin-bottom: .5em !important;
+  margin-bottom: 0.5em !important;
 }
 
 .room-users {
@@ -109,14 +109,15 @@
 }
 
 .room-message-time {
-  float:right;
-  opacity: .5;
+  float: right;
+  opacity: 0.5;
   font-size: smaller;
   font-variant: small-caps;
   font-style: italic;
 }
 
-.room-message-self, .room-user-self {
+.room-message-self,
+.room-user-self {
   color: blue;
 }
 
@@ -129,7 +130,7 @@
 }
 
 #room-history-scroll-anchor {
-  scroll-snap-align: start
+  scroll-snap-align: start;
 }
 
 /* semantic-ui-react colors the border of inputs
@@ -138,9 +139,9 @@
    this had to be added to an id to override the class
    declaration. */
 #room-message-input {
-    border-right-color: transparent !important;
+  border-right-color: transparent !important;
 }
 
 .unknown-user-flag {
-  opacity: .1 !important;
+  opacity: 0.1 !important;
 }

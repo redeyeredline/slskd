@@ -14,61 +14,6 @@
 // ============================================================================
 // .ESLINTRC.JS CONFIGURATION
 // ============================================================================
-/*
-const overrides = {
-  eqeqeq: ['error', 'always', { null: 'ignore' }], // noisy
-  'id-length': 'off', // noisy
-  'no-console': 'off', // noisy
-  'no-eq-null': 'off', // noisy
-  'react/forbid-component-props': 'off', // noisy
-  'react/prop-types': 'off', // noisy
-  'unicorn/no-array-reduce': 'off', // noisy
-};
-
-module.exports = {
-  extends: ['canonical/auto', 'canonical/browser', 'canonical/node'],
-  ignorePatterns: ['build', 'node_modules', 'package-lock.json'],
-  overrides: [
-    {
-      extends: [
-        'canonical',
-        'canonical/regexp',
-        'canonical/jsdoc',
-        'canonical/jsx-a11y',
-        'canonical/react',
-        'canonical/prettier',
-      ],
-      files: ['*.jsx'],
-      parserOptions: {
-        babelOptions: {
-          parserOpts: {
-            plugins: ['jsx'],
-          },
-        },
-      },
-      rules: {
-        ...overrides,
-        'react/no-set-state': 'off', // only useful when using state libs
-      },
-    },
-    {
-      extends: ['canonical/jest'],
-      files: '*.test.{js,jsx}',
-    },
-  ],
-  root: true,
-  rules: {
-    ...overrides,
-
-    'import/no-unassigned-import': [
-      'error',
-      {
-        allow: ['semantic-ui-less/semantic.less', '**/*.css'],
-      },
-    ],
-  },
-};
-*/
 
 // ============================================================================
 // KEY LINT RULES SUMMARY
@@ -128,5 +73,5 @@ npm run lint
 npm run lint:fix
 */
 
-console.log('Lint configuration exported successfully!');
-console.log('Copy the configurations above to reuse the same lint rules.'); 
+console.log("Lint configuration exported successfully!");
+console.log("Copy the configurations above to reuse the same lint rules.");

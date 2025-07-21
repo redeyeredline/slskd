@@ -6,7 +6,7 @@
 
 .browse-segment-icon {
   padding-top: 10px;
-  padding-right: .5em;
+  padding-right: 0.5em;
 }
 
 .browse-results {
@@ -37,7 +37,7 @@
 }
 
 .browse-results-row:last-child {
-  padding-bottom: 0px !important;  
+  padding-bottom: 0px !important;
 }
 
 .browse-folderlist {
@@ -69,13 +69,18 @@
   padding: 1em !important;
 }
 
-.ui.list .list, ol.ui.list ol, ul.ui.list ul {
+.ui.list .list,
+ol.ui.list ol,
+ul.ui.list ul {
   padding-left: 0px !important;
   padding-top: 3px !important;
   padding-bottom: 0px !important;
 }
 
-.ui.list .list>.item>.icon+.content, .ui.list .list>.item>.image+.content, .ui.list>.item>.icon+.content, .ui.list>.item>.image+.content {
+.ui.list .list > .item > .icon + .content,
+.ui.list .list > .item > .image + .content,
+.ui.list > .item > .icon + .content,
+.ui.list > .item > .image + .content {
   padding-left: 0px !important;
 }
 

@@ -33,13 +33,13 @@
     flex-direction: column;
     gap: 10px;
   }
-  
+
   .pagination-info {
     margin-left: 0;
     text-align: center;
   }
-  
+
   .directory-search {
     padding: 0 5px;
   }
-} 
+}

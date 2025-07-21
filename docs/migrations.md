@@ -32,7 +32,7 @@ If a migration fails, the application will attempt to restore the databases from
 
 If the application gets "stuck" in a reboot loop and can't complete migration(s) successfully, you will need to rename (or delete) the existing database files and allow the application to re-generate them.
 
-It should be possible to recover the old data, but the process will need to be manual.  Create a GitHub issue and provide logs from the failing migration(s).
+It should be possible to recover the old data, but the process will need to be manual. Create a GitHub issue and provide logs from the failing migration(s).
 
 ## Preventing Migration Issues
 
@@ -41,4 +41,3 @@ To minimize the risk of migration failures:
 - Ensure Sufficient Disk Space: Verify that there is enough disk space available for creating backups and applying migrations.
 - Avoid Interruptions: Do not stop the application while a migration is in progress.
 - Monitor Logs: Check the application logs for detailed information about the migration process and any errors encountered.
-

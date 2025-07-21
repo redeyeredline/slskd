@@ -23,15 +23,15 @@ services:
       # Uncomment and modify the line below if you want to share directories
       # - SLSKD_SHARED_DIR=/music;/ebooks
     ports:
-      - "5030:5030/tcp"   # HTTP web interface
-      - "5031:5031/tcp"   # HTTPS web interface
+      - "5030:5030/tcp" # HTTP web interface
+      - "5031:5031/tcp" # HTTPS web interface
       - "50300:50300/tcp" # Soulseek network port
     volumes:
       - /opt/dockerdata/slskd-enhanced:/app
       # Uncomment and modify the lines below if you want to share directories
       # - /path/to/your/music:/music:rw
       # - /path/to/your/ebooks:/ebooks:rw
-    user: "1000:1000"  # Change to your user ID if needed
+    user: "1000:1000" # Change to your user ID if needed
     healthcheck:
       test: ["CMD", "wget", "-q", "-O", "-", "http://localhost:5030/health"]
       interval: 60s
@@ -43,4 +43,4 @@ services:
 
 networks:
   slskd-network:
-    driver: bridge 
+    driver: bridge

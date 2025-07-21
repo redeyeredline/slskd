@@ -18,7 +18,7 @@
 
 .users-segment-icon {
   padding-top: 10px;
-  padding-right: .5em;
+  padding-right: 0.5em;
 }
 
 .users-input {
@@ -33,7 +33,7 @@
 .users-picture-placeholder {
   text-align: center;
   padding-top: 10px !important;
-  opacity: .125;
+  opacity: 0.125;
 }
 
 .ui.items > .item > .content > .description {

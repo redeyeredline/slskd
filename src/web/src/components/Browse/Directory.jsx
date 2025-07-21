@@ -20,23 +20,62 @@ class Directory extends Component {
       files: this.props.files.map((f) => ({ selected: false, ...f })),
       selectedSubdirectories: new Set(), // Track selected subdirectories separately
       subdirectories: this.props.subdirectories || [],
+      totalSelectedSubdirBytes: 0,
+      totalSelectedSubdirFiles: 0,
     };
   }
 
-  componentDidUpdate(previousProps) {
+  async componentDidUpdate(previousProps, previousState) {
     if (this.props.name !== previousProps.name) {
-      console.log('Directory component updated with props:', {
-        files: this.props.files,
-        name: this.props.name,
-        subdirectories: this.props.subdirectories,
-      });
       this.setState({
         files: this.props.files.map((f) => ({ selected: false, ...f })),
         selectedSubdirectories: new Set(), // Reset selected subdirectories when directory changes
         subdirectories: this.props.subdirectories || [],
+        totalSelectedSubdirBytes: 0,
+        totalSelectedSubdirFiles: 0,
       });
     }
+
+    // If selectedSubdirectories or subdirectories changed, recalculate totals
+    if (
+      previousState.selectedSubdirectories !==
+        this.state.selectedSubdirectories ||
+      previousState.subdirectories !== this.state.subdirectories
+    ) {
+      this.updateSelectedSubdirTotals();
+    }
   }
+
+  updateSelectedSubdirTotals = async () => {
+    const { selectedSubdirectories, subdirectories } = this.state;
+    const { name, username } = this.props;
+    let fileCount = 0;
+    let byteCount = 0;
+    for (const subdir of subdirectories) {
+      if (selectedSubdirectories.has(subdir.name)) {
+        try {
+          const response = await users.getDirectoryContents({
+            directory: `${name}${this.props.separator || '/'}${subdir.name}`,
+            username,
+          });
+          if (response && response.files && Array.isArray(response.files)) {
+            fileCount += response.files.length;
+            byteCount += response.files.reduce(
+              (sum, f) => sum + (f.size || 0),
+              0,
+            );
+          }
+        } catch {
+          // ignore errors for now
+        }
+      }
+    }
+
+    this.setState({
+      totalSelectedSubdirBytes: byteCount,
+      totalSelectedSubdirFiles: fileCount,
+    });
+  };
 
   /* eslint-disable complexity */
   download = async (username, files, selectedSubdirectories) => {
@@ -232,6 +271,94 @@ class Directory extends Component {
     });
   };
 
+  renderSubdirectoryList(
+    subdirectories,
+    selectedSubdirectories,
+    downloadRequest,
+    locked,
+  ) {
+    return subdirectories.map((subdir) => {
+      const subdirSelected = selectedSubdirectories.has(subdir.name);
+      return (
+        <List.Item
+          key={subdir.name}
+          style={{
+            alignItems: 'center',
+            borderRadius: '4px',
+            cursor: 'default',
+            display: 'flex',
+            gap: '10px',
+            padding: '8px 12px',
+          }}
+        >
+          <Checkbox
+            checked={subdirSelected}
+            disabled={downloadRequest === 'inProgress' || locked}
+            onChange={(event, data) => {
+              event.stopPropagation();
+              this.handleSubdirectorySelection(subdir, data.checked);
+            }}
+          />
+          <Icon name="folder" />
+          <List.Content style={{ flex: 1 }}>
+            <List.Header style={{ color: '#ffffff', fontWeight: '500' }}>
+              {subdir.name}
+            </List.Header>
+            <List.Description style={{ color: '#cccccc', fontSize: '0.9em' }}>
+              Select to download entire folder
+            </List.Description>
+          </List.Content>
+        </List.Item>
+      );
+    });
+  }
+
+  renderDownloadButton(
+    selectedFiles,
+    selectedSubdirectories,
+    totalSelectedSubdirFiles,
+    downloadRequest,
+    locked,
+    username,
+  ) {
+    return (
+      <Button
+        color="green"
+        disabled={
+          (selectedFiles.length === 0 && selectedSubdirectories.size === 0) ||
+          downloadRequest === 'inProgress' ||
+          locked
+        }
+        loading={downloadRequest === 'inProgress'}
+        onClick={async () => {
+          await this.download(username, selectedFiles, selectedSubdirectories);
+        }}
+      >
+        <Icon name="download" />
+        Download
+        {selectedFiles.length > 0 || selectedSubdirectories.size > 0 ? (
+          <>
+            {' '}
+            {selectedFiles.length > 0 && `${selectedFiles.length} files`}
+            {selectedFiles.length > 0 &&
+              selectedSubdirectories.size > 0 &&
+              ', '}
+            {selectedSubdirectories.size > 0 &&
+              `${selectedSubdirectories.size} folder${selectedSubdirectories.size > 1 ? 's' : ''}`}
+            {this.state.totalSelectedSubdirFiles > 0 &&
+              ` (${this.state.totalSelectedSubdirFiles} files in selected folders)`}
+            {this.state.totalSelectedSubdirBytes > 0 &&
+              `, ${formatBytes(this.state.totalSelectedSubdirBytes)} in selected folders`}
+            {', '}
+            {formatBytes(selectedFiles.reduce((total, f) => total + f.size, 0))}
+          </>
+        ) : (
+          ' 0 files, 0 folders, 0 B'
+        )}
+      </Button>
+    );
+  }
+
   render() {
     const { locked, marginTop, name, onClose, username } = this.props;
     const {
@@ -243,41 +370,42 @@ class Directory extends Component {
     } = this.state;
 
     const selectedFiles = files.filter((f) => f.selected);
-    const allFilesSelected =
-      files.length > 0 && selectedFiles.length === files.length;
 
-    const selectedSize = formatBytes(
-      selectedFiles.reduce((total, f) => total + f.size, 0),
-    );
+    // const allFilesSelected =
+    //   files.length > 0 && selectedFiles.length === files.length;
 
-    const handleSelectAllFiles = (checked) => {
+    /* const handleSelectAllFiles = (checked) => {
       for (const file of files) {
         file.selected = checked;
       }
 
       this.setState({ files: [...files] });
-    };
+    };*/
 
     const allSubdirsSelected =
       subdirectories.length > 0 &&
       subdirectories.every((subdir) => selectedSubdirectories.has(subdir.name));
-    const someSubdirsSelected =
-      subdirectories.some((subdir) => selectedSubdirectories.has(subdir.name));
+
+    const someSubdirsSelected = subdirectories.some((subdir) =>
+      selectedSubdirectories.has(subdir.name),
+    );
 
     const handleSelectAllSubdirs = (checked) => {
       const newSelected = new Set(selectedSubdirectories);
       if (checked) {
-        subdirectories.forEach((subdir) => newSelected.add(subdir.name));
+        for (const subdir of subdirectories) {
+          newSelected.add(subdir.name);
+        }
       } else {
-        subdirectories.forEach((subdir) => newSelected.delete(subdir.name));
+        for (const subdir of subdirectories) {
+          newSelected.delete(subdir.name);
+        }
       }
+
       this.setState({ selectedSubdirectories: newSelected });
     };
 
-    // Calculate total files in selected subdirectories
-    const totalSelectedSubdirFiles = subdirectories
-      .filter((subdir) => selectedSubdirectories.has(subdir.name))
-      .reduce((sum, subdir) => sum + (subdir.fileCount || 0), 0);
+    // Remove useState/useEffect and use this.state.totalSelectedSubdirFiles/Bytes
 
     const hasContent = files.length > 0 || subdirectories.length > 0;
 
@@ -299,12 +427,7 @@ class Directory extends Component {
                 padding: '10px',
               }}
             >
-              <Checkbox
-                checked={allFilesSelected}
-                disabled={downloadRequest === 'inProgress' || locked}
-                label="Select entire folder"
-                onChange={(event, data) => handleSelectAllFiles(data.checked)}
-              />
+              {/* Removed big white 'Select entire folder' checkbox */}
               {selectedFiles.length > 0 && (
                 <span style={{ color: '#666', fontSize: '0.9em' }}>
                   {selectedFiles.length} of {files.length} files selected
@@ -323,62 +446,26 @@ class Directory extends Component {
                     <div style={{ marginBottom: '8px' }}>
                       <Checkbox
                         checked={allSubdirsSelected}
-                        indeterminate={someSubdirsSelected && !allSubdirsSelected}
                         disabled={downloadRequest === 'inProgress' || locked}
+                        indeterminate={
+                          someSubdirsSelected && !allSubdirsSelected
+                        }
                         label="Select all subfolders"
-                        onChange={(event, data) => handleSelectAllSubdirs(data.checked)}
+                        onChange={(event, data) =>
+                          handleSelectAllSubdirs(data.checked)
+                        }
                       />
                     </div>
                     <List
                       divided
                       relaxed
                     >
-                      {subdirectories.map((subdir) => {
-                        const subdirSelected = selectedSubdirectories.has(
-                          subdir.name,
-                        );
-
-                        return (
-                          <List.Item
-                            key={subdir.name}
-                            style={{
-                              alignItems: 'center',
-                              borderRadius: '4px',
-                              cursor: 'default',
-                              display: 'flex',
-                              gap: '10px',
-                              padding: '8px 12px',
-                            }}
-                          >
-                            <Checkbox
-                              checked={subdirSelected}
-                              disabled={
-                                downloadRequest === 'inProgress' || locked
-                              }
-                              onChange={(event, data) => {
-                                event.stopPropagation();
-                                this.handleSubdirectorySelection(
-                                  subdir,
-                                  data.checked,
-                                );
-                              }}
-                            />
-                            <Icon name="folder" />
-                            <List.Content style={{ flex: 1 }}>
-                              <List.Header
-                                style={{ color: '#ffffff', fontWeight: '500' }}
-                              >
-                                {subdir.name}
-                              </List.Header>
-                              <List.Description
-                                style={{ color: '#cccccc', fontSize: '0.9em' }}
-                              >
-                                Select to download entire folder
-                              </List.Description>
-                            </List.Content>
-                          </List.Item>
-                        );
-                      })}
+                      {this.renderSubdirectoryList(
+                        subdirectories,
+                        selectedSubdirectories,
+                        downloadRequest,
+                        locked,
+                      )}
                     </List>
                   </div>
                 )}
@@ -407,43 +494,14 @@ class Directory extends Component {
         {(selectedFiles.length > 0 || selectedSubdirectories.size > 0) && (
           <Card.Content extra>
             <span>
-              <Button
-                color="green"
-                content="Download"
-                disabled={
-                  (selectedFiles.length === 0 && selectedSubdirectories.size === 0) ||
-                  downloadRequest === 'inProgress' ||
-                  locked
-                }
-                loading={downloadRequest === 'inProgress'}
-                onClick={async () => {
-                  await this.download(
-                    username,
-                    selectedFiles,
-                    selectedSubdirectories,
-                  );
-                }}
-              >
-                <Icon name="download" />
-                Download
-                {selectedFiles.length > 0 || selectedSubdirectories.size > 0 ? (
-                  <>
-                    {' '}
-                    {selectedFiles.length > 0 && `${selectedFiles.length} files`}
-                    {selectedFiles.length > 0 && selectedSubdirectories.size > 0 && ', '}
-                    {selectedSubdirectories.size > 0 &&
-                      `${selectedSubdirectories.size} folder${selectedSubdirectories.size > 1 ? 's' : ''}`}
-                    {totalSelectedSubdirFiles > 0 &&
-                      ` (${totalSelectedSubdirFiles} files in selected folders)`}
-                    {', '}
-                    {formatBytes(
-                      selectedFiles.reduce((total, f) => total + f.size, 0),
-                    )}
-                  </>
-                ) : (
-                  ' 0 files, 0 folders, 0 B'
-                )}
-              </Button>
+              {this.renderDownloadButton(
+                selectedFiles,
+                selectedSubdirectories,
+                this.state.totalSelectedSubdirFiles,
+                downloadRequest,
+                locked,
+                username,
+              )}
               {downloadRequest === 'inProgress' && (
                 <Icon
                   loading

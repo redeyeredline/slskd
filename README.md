@@ -13,25 +13,25 @@ A modern client-server application for the [Soulseek](https://www.slsknet.org/ne
 
 ### Secure access
 
-slskd runs as a daemon or Docker container in your network (or in the cloud!) and is accessible from a web browser.  It's designed to be exposed to the internet, and everything is secured with a token that [you can control](https://github.com/slskd/slskd/blob/master/docs/config.md#authentication).  It also supports [reverse proxies](https://github.com/slskd/slskd/blob/master/docs/reverse_proxy.md), making it work well with other self-hosted tools.
+slskd runs as a daemon or Docker container in your network (or in the cloud!) and is accessible from a web browser. It's designed to be exposed to the internet, and everything is secured with a token that [you can control](https://github.com/slskd/slskd/blob/master/docs/config.md#authentication). It also supports [reverse proxies](https://github.com/slskd/slskd/blob/master/docs/reverse_proxy.md), making it work well with other self-hosted tools.
 
 ![image](https://user-images.githubusercontent.com/17145758/193290217-0e6d87f5-a547-4451-8d90-d554a902716c.png)
 
 ### Search
 
-Search for things just like you're used to with the official Soulseek client.  slskd makes it easy to enter multiple searches quickly.
+Search for things just like you're used to with the official Soulseek client. slskd makes it easy to enter multiple searches quickly.
 
 ![image](https://user-images.githubusercontent.com/17145758/193286989-30bd524d-81b6-4721-bd72-e4438c2b7b69.png)
 
 ### Results
 
-Sort and filter search results using the same filters you use today.  Dismiss results you're not interested in, and download the ones you want in a couple of clicks.
+Sort and filter search results using the same filters you use today. Dismiss results you're not interested in, and download the ones you want in a couple of clicks.
 
 ![image](https://user-images.githubusercontent.com/17145758/193288396-dc3cc83d-6d93-414a-93f6-cea0696ac245.png)
 
 ### Downloads
 
-Monitor the speed and status of downloads, grouped by user and folder.  Click the progress bar to fetch your place in queue, and use the selection tools to cancel, retry, or clear completed downloads.  Use the controls at the top to quickly manage downloads by status.
+Monitor the speed and status of downloads, grouped by user and folder. Click the progress bar to fetch your place in queue, and use the selection tools to cancel, retry, or clear completed downloads. Use the controls at the top to quickly manage downloads by status.
 
 ![image](https://user-images.githubusercontent.com/17145758/193289840-3aee153f-3656-4f15-b086-8b1ca25d38bb.png)
 
@@ -78,9 +78,9 @@ services:
 
 This command or docker-compose file (depending on your choice) starts a container instance of slskd on ports 5030 (HTTP) and 5031 (HTTPS using a self-signed certificate). slskd begins listening for incoming connections on port 50300 and maps the application directory to the provided path.
 
-Once the container is running you can access the web UI over HTTP on port 5030, or HTTPS on port 5031.  The default username and password are `slskd` and `slskd`, respectively.  You'll want to change these if the application will be internet facing.
+Once the container is running you can access the web UI over HTTP on port 5030, or HTTPS on port 5031. The default username and password are `slskd` and `slskd`, respectively. You'll want to change these if the application will be internet facing.
 
-The `SLSKD_REMOTE_CONFIGURATION` environment variable allows you to modify application configuration settings from the web UI.  You might not want to enable this for an internet-facing installation.
+The `SLSKD_REMOTE_CONFIGURATION` environment variable allows you to modify application configuration settings from the web UI. You might not want to enable this for an internet-facing installation.
 
 You can find a more in-depth guide to running slskd in Docker [here](https://github.com/slskd/slskd/blob/master/docs/docker.md).
 
@@ -90,7 +90,7 @@ The latest stable binaries can be downloaded from the [releases](https://github.
 
 Binaries are shipped as zip files; extract the zip to your chosen directory and run.
 
-An application directory will be created in either `~/.local/share/slskd` (on Linux and macOS) or `%localappdata%/slskd` (on Windows).  In the root of this directory the file `slskd.yml` will be created the first time the application runs.  Edit this file to enter your credentials for the Soulseek network, and tweak any additional settings using the [configuration guide](https://github.com/slskd/slskd/blob/master/docs/config.md).
+An application directory will be created in either `~/.local/share/slskd` (on Linux and macOS) or `%localappdata%/slskd` (on Windows). In the root of this directory the file `slskd.yml` will be created the first time the application runs. Edit this file to enter your credentials for the Soulseek network, and tweak any additional settings using the [configuration guide](https://github.com/slskd/slskd/blob/master/docs/config.md).
 
 ## Configuration
 

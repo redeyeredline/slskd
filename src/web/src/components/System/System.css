@@ -8,11 +8,13 @@
   margin-bottom: 16px;
 }
 
-.logs-table, .events-table {
+.logs-table,
+.events-table {
   font-size: smaller;
 }
 
-.logs-table-body, .events-table-body {
+.logs-table-body,
+.events-table-body {
   font-family: monospace;
 }
 
@@ -50,7 +52,8 @@
   padding: 0px !important;
 }
 
-.debug-view-content, .share-ls-content {
+.debug-view-content,
+.share-ls-content {
   padding: 5px !important;
 }
 
@@ -68,7 +71,8 @@
   text-align: right;
 }
 
-.edit-code-container, .edit-code-container-error {
+.edit-code-container,
+.edit-code-container-error {
   overflow: auto;
 }
 

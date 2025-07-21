@@ -54,7 +54,6 @@ Create a file named "slskd.subdomain.conf" in /PATH_TO_SWAG/nginx/proxy-confs/
 
 Here's an example, you may need to change the port.
 
-
 ```
 # make sure that your slskd container is named slskd
 # make sure that your dns has a cname set for slskd
@@ -104,7 +103,6 @@ server {
 }
 ```
 
-
 ## Apache
 
 With `URL_BASE` set to `/slskd`:
@@ -121,7 +119,7 @@ From [discussion #890](https://github.com/slskd/slskd/discussions/890)
 
 You'll need the [URL rewrite module](https://learn.microsoft.com/en-us/iis/extensions/url-rewrite-module/using-the-url-rewrite-module) installed before you begin, and you'll need to set `URL_BASE` to `/slskd` in the slskd config.
 
-Update the `web.config` for your root site to add a rewrite rule.  Here's an example that rewrites `<your site>/slskd`:
+Update the `web.config` for your root site to add a rewrite rule. Here's an example that rewrites `<your site>/slskd`:
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>

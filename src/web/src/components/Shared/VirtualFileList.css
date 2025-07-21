@@ -63,12 +63,12 @@
   .virtual-file-list {
     height: 300px;
   }
-  
+
   .virtual-file-row td {
     padding: 6px 8px !important;
   }
-  
+
   .virtual-file-table .ui.table thead th {
     padding: 8px 6px;
   }
-} 
+}
