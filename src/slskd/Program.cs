@@ -54,6 +54,7 @@ namespace slskd
     using Serilog.Sinks.Grafana.Loki;
     using Serilog.Sinks.SystemConsole.Themes;
     using slskd.Authentication;
+    using slskd.Common.Authentication;
     using slskd.Configuration;
     using slskd.Core.API;
     using slskd.Cryptography;
@@ -718,6 +719,11 @@ namespace slskd
 
                     options.AddPolicy(AuthPolicy.Any, policy =>
                     {
+                        // Add local IP bypass authentication if enabled
+                        if (OptionsAtStartup.Web.Authentication.LocalIpBypass.Enabled)
+                        {
+                            policy.AuthenticationSchemes.Add(LocalIpBypassAuthentication.AuthenticationScheme);
+                        }
                         policy.AuthenticationSchemes.Add(ApiKeyAuthentication.AuthenticationScheme);
                         policy.AuthenticationSchemes.Add(JwtBearerDefaults.AuthenticationScheme);
                         policy.RequireAuthenticatedUser();
@@ -785,6 +791,19 @@ namespace slskd
                         };
                     })
                     .AddScheme<ApiKeyAuthenticationOptions, ApiKeyAuthenticationHandler>(ApiKeyAuthentication.AuthenticationScheme, (_) => { });
+
+                // Add local IP bypass authentication if enabled
+                if (OptionsAtStartup.Web.Authentication.LocalIpBypass.Enabled)
+                {
+                    services.AddAuthentication(LocalIpBypassAuthentication.AuthenticationScheme)
+                        .AddScheme<LocalIpBypassAuthenticationOptions, LocalIpBypassAuthenticationHandler>(
+                            LocalIpBypassAuthentication.AuthenticationScheme,
+                            options =>
+                            {
+                                options.Cidr = OptionsAtStartup.Web.Authentication.LocalIpBypass.Cidr;
+                                options.Role = OptionsAtStartup.Web.Authentication.LocalIpBypass.Role.ToEnum<Role>();
+                            });
+                }
             }
             else
             {

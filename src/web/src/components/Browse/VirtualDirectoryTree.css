@@ -1,0 +1,77 @@
+.virtual-directory-tree {
+  height: 400px;
+  border: 1px solid #d4d4d5;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.virtual-tree-item {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  border-bottom: 1px solid #f0f0f0;
+  transition: background-color 0.2s ease;
+}
+
+.virtual-tree-item:hover {
+  background-color: #f8f9fa;
+}
+
+.virtual-tree-item.selected {
+  background-color: #e3f2fd;
+}
+
+.virtual-tree-item.locked {
+  opacity: 0.5;
+}
+
+.virtual-tree-icon {
+  margin-right: 8px;
+  cursor: pointer;
+}
+
+.virtual-tree-icon.selected {
+  color: #2185d0;
+}
+
+.virtual-tree-icon.locked {
+  color: #db2828;
+}
+
+.virtual-tree-header {
+  cursor: pointer;
+  font-weight: normal;
+  margin: 0;
+  padding: 0;
+}
+
+.virtual-tree-header:hover {
+  color: #2185d0;
+}
+
+.virtual-tree-header.selected {
+  color: #2185d0;
+  font-weight: bold;
+}
+
+.virtual-tree-header.locked {
+  color: #db2828;
+}
+
+.no-items {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+  font-style: italic;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .virtual-directory-tree {
+    height: 300px;
+  }
+  
+  .virtual-tree-item {
+    padding: 6px 8px;
+  }
+} 

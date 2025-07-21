@@ -1,0 +1,74 @@
+.virtual-file-list-container {
+  border: 1px solid #d4d4d5;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.virtual-file-table {
+  margin: 0 !important;
+  border: none !important;
+}
+
+.virtual-file-table .ui.table thead th {
+  background-color: #f9fafb;
+  border-bottom: 1px solid #d4d4d5;
+  font-weight: bold;
+  padding: 12px 8px;
+}
+
+.virtual-file-list {
+  height: 400px;
+  overflow: hidden;
+}
+
+.virtual-file-row {
+  border-bottom: 1px solid #f0f0f0;
+  transition: background-color 0.2s ease;
+}
+
+.virtual-file-row:hover {
+  background-color: #f8f9fa;
+}
+
+.virtual-file-row td {
+  padding: 8px 12px !important;
+  border: none !important;
+  vertical-align: middle;
+}
+
+.virtual-file-table-footer {
+  margin: 0 !important;
+  border: none !important;
+  border-top: 1px solid #d4d4d5 !important;
+}
+
+.virtual-file-table-footer .ui.table tfoot th {
+  background-color: #f9fafb;
+  padding: 12px 8px;
+  font-weight: normal;
+}
+
+.no-files {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+  font-style: italic;
+  border: 1px solid #d4d4d5;
+  border-radius: 4px;
+  margin-top: 10px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .virtual-file-list {
+    height: 300px;
+  }
+  
+  .virtual-file-row td {
+    padding: 6px 8px !important;
+  }
+  
+  .virtual-file-table .ui.table thead th {
+    padding: 8px 6px;
+  }
+} 

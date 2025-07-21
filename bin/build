@@ -58,12 +58,12 @@ else
   if [ "$skip_tests" == true ]; then
       echo $'\n\t⏩  web tests skipped\n'
   else
-      echo $'\n\t🧪  npm run test-unattended\n'
-      npm run test-unattended
+        echo $'\n\t🧪  npm run test-unattended\n'
+  NODE_NO_WARNINGS=1 npm run test-unattended
   fi
 
   echo $'\n\t🛠️  npm run build\n'
-  npm run build
+  NODE_NO_WARNINGS=1 npm run build
 
   if [ "$web_only" == false ]; then
     # remove old build, but keep .gitkeep

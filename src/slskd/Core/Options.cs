@@ -1894,6 +1894,12 @@ namespace slskd
                 public Dictionary<string, ApiKeyOptions> ApiKeys { get; init; } = new Dictionary<string, ApiKeyOptions>();
 
                 /// <summary>
+                ///     Gets local IP bypass options.
+                /// </summary>
+                [Validate]
+                public LocalIpBypassOptions LocalIpBypass { get; init; } = new LocalIpBypassOptions();
+
+                /// <summary>
                 ///     JWT options.
                 /// </summary>
                 public class JwtOptions
@@ -1918,6 +1924,60 @@ namespace slskd
                     [Range(3600, int.MaxValue)]
                     [RequiresRestart]
                     public int Ttl { get; init; } = 604800000;
+                }
+
+                /// <summary>
+                ///     Local IP bypass options.
+                /// </summary>
+                public class LocalIpBypassOptions : IValidatableObject
+                {
+                    /// <summary>
+                    ///     Gets a value indicating whether local IP bypass should be enabled.
+                    /// </summary>
+                    [Argument(default, "local-ip-bypass")]
+                    [EnvironmentVariable("LOCAL_IP_BYPASS")]
+                    [Description("enable local IP subnet bypass for authentication")]
+                    [RequiresRestart]
+                    public bool Enabled { get; init; } = false;
+
+                    /// <summary>
+                    ///     Gets the comma separated list of CIDRs that are considered local and can bypass authentication.
+                    /// </summary>
+                    [Argument(default, "local-ip-bypass-cidr")]
+                    [EnvironmentVariable("LOCAL_IP_BYPASS_CIDR")]
+                    [Description("comma separated list of CIDRs for local IP bypass")]
+                    public string Cidr { get; init; } = "127.0.0.1/32,::1/128,192.168.0.0/16,10.0.0.0/8,172.16.0.0/12";
+
+                    /// <summary>
+                    ///     Gets the role assigned to local IP bypass users.
+                    /// </summary>
+                    [Argument(default, "local-ip-bypass-role")]
+                    [EnvironmentVariable("LOCAL_IP_BYPASS_ROLE")]
+                    [Description("role assigned to local IP bypass users")]
+                    [Enum(typeof(Role))]
+                    public string Role { get; init; } = "Administrator";
+
+                    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+                    {
+                        var results = new List<ValidationResult>();
+
+                        if (Enabled && !string.IsNullOrWhiteSpace(Cidr))
+                        {
+                            foreach (var cidr in Cidr.Split(','))
+                            {
+                                try
+                                {
+                                    _ = IPAddressRange.Parse(cidr);
+                                }
+                                catch (Exception ex)
+                                {
+                                    results.Add(new ValidationResult($"Local IP bypass CIDR {cidr} is invalid: {ex.Message}"));
+                                }
+                            }
+                        }
+
+                        return results;
+                    }
                 }
 
                 /// <summary>
@@ -2091,7 +2151,7 @@ namespace slskd
                 ///     Gets the time to wait before timing out, in milliseconds.
                 /// </summary>
                 [Range(500, int.MaxValue)]
-                public int Timeout { get; init; } = 5000;
+                public int Timeout { get; init; } = 15000; // Increased from 5000ms to 15000ms for large directories
 
                 /// <summary>
                 ///     Gets the retry configuration.

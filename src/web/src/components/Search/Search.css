@@ -126,3 +126,13 @@
   display: inline;
   margin-left: auto;
 }
+
+.clickable-username {
+  color: #2185d0;
+  transition: color 0.2s ease;
+}
+
+.clickable-username:hover {
+  color: #1678c2;
+  text-decoration: underline !important;
+}

@@ -3,6 +3,7 @@ import { getDirectoryContents } from '../../lib/users';
 import { formatBytes, getDirectoryName } from '../../lib/util';
 import FileList from '../Shared/FileList';
 import React, { Component } from 'react';
+import { withRouter } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { Button, Card, Icon, Label } from 'semantic-ui-react';
 
@@ -131,6 +132,14 @@ class Response extends Component {
     this.setState((previousState) => ({ isFolded: !previousState.isFolded }));
   };
 
+  handleUsernameClick = () => {
+    const { history } = this.props;
+    const { response } = this.props;
+
+    // Navigate to browse page with the username pre-filled
+    history.push('/browse', { user: response.username });
+  };
+
   render() {
     const { response } = this.props;
     const free = response.hasFreeUploadSlot;
@@ -167,7 +176,28 @@ class Response extends Component {
               color={free ? 'green' : 'yellow'}
               name="circle"
             />
-            {response.username}
+            <button
+              className="clickable-username"
+              onClick={this.handleUsernameClick}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                  this.handleUsernameClick();
+                }
+              }}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: '#2185d0',
+                cursor: 'pointer',
+                font: 'inherit',
+                padding: 0,
+                textDecoration: 'underline',
+              }}
+              title="Click to browse this user's files"
+              type="button"
+            >
+              {response.username}
+            </button>
             <Icon
               className="close-button"
               color="red"
@@ -267,4 +297,4 @@ class Response extends Component {
   }
 }
 
-export default Response;
+export default withRouter(Response);

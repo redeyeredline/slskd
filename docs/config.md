@@ -703,6 +703,12 @@ Timeout options control how long the application waits for connections to connec
 
 Higher connect timeout values will help ensure that operations (browse, download requests, etc.) are successful the first time but decrease the responsiveness of commands that will ultimately fail.
 
+**Note**: For large directory operations (browsing users with extensive file libraries), the application now includes:
+- **Increased default timeout** from 5 seconds to 15 seconds for directory operations
+- **Automatic retry logic** with exponential backoff (1s, 2s, 4s delays)
+- **Progress indicators** showing retry attempts and status
+- **Graceful error handling** that continues processing other directories even if some fail
+
 Inactivity timeouts help the application determine when a distributed parent connection has stopped sending data and when connections that have delivered search results (and are unlikely to be used further) from remaining open longer than needed. Reducing this timeout can help low spec systems if port exhaustion is a concern but may result in the application "hunting" for a distributed parent connection needlessly.
 
 | Command-Line                | Environment Variable            | Description                                      |
@@ -863,6 +869,10 @@ Note that CIDR filtering may not work as expected behind a reverse proxy, ingres
 
 Please also note that using API key authentication without HTTPS is **NOT RECOMMENDED**.  API keys are sent in HTTP headers (and in the case of SignalR, in query parameters) and will be easily accessible to anyone eavesdropping on the network.  This is a risk with JWTs as well, but JWTs expire and API keys don't.  If you choose to use API keys over plain HTTP, seriously consider using CIDR filtering.
 
+**Local IP Bypass** allows users from specified IP subnets to access the web UI without authentication. This is useful for local network access where you want to avoid login prompts, similar to how Lidarr, Radarr, and Sonarr work. The feature is disabled by default and includes common local network ranges (127.0.0.1/32, ::1/128, 192.168.0.0/16, 10.0.0.0/8, 172.16.0.0/12). Users accessing from local IPs will be automatically authenticated with the specified role (default: Administrator).
+
+**Docker/Reverse Proxy Support**: When running in Docker or behind a reverse proxy, the application automatically detects and uses the `X-Forwarded-For` and `X-Real-IP` headers to determine the real client IP address. This ensures that local IP bypass works correctly even when the application sees the Docker host's IP instead of the actual client IP.
+
 | Command-Line     | Environment Variable       | Description                                         |
 | ---------------- | -------------------------- | --------------------------------------------------- |
 | `-X\|--no-auth`  | `SLSKD_NO_AUTH`            | Determines whether authentication is to be disabled |
@@ -870,6 +880,9 @@ Please also note that using API key authentication without HTTPS is **NOT RECOMM
 | `-p\|--password` | `SLSKD_PASSWORD`           | The password for the web UI                         |
 | `--jwt-key`      | `SLSKD_JWT_KEY`            | The secret key used to sign JWTs                    |
 | `--jwt-ttl`      | `SLSKD_JWT_TTL`            | The TTL (duration) of JWTs, in milliseconds         |
+| `--local-ip-bypass` | `SLSKD_LOCAL_IP_BYPASS` | Enable local IP subnet bypass for authentication    |
+| `--local-ip-bypass-cidr` | `SLSKD_LOCAL_IP_BYPASS_CIDR` | Comma separated list of CIDRs for local IP bypass |
+| `--local-ip-bypass-role` | `SLSKD_LOCAL_IP_BYPASS_ROLE` | Role assigned to local IP bypass users |
 
 #### **YAML**
 ```yaml
@@ -881,6 +894,10 @@ web:
     jwt:
       key: ~
       ttl: 604800000
+    local_ip_bypass:
+      enabled: false
+      cidr: 127.0.0.1/32,::1/128,192.168.0.0/16,10.0.0.0/8,172.16.0.0/12
+      role: Administrator
     api_keys:
       my_api_key:
         key: <some example string between 16 and 255 characters>

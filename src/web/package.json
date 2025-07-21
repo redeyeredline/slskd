@@ -25,6 +25,8 @@
     "react-responsive": "^9.0.0-beta.5",
     "react-router-dom": "^5.0.0",
     "react-toastify": "^9.0.1",
+    "react-window": "^1.8.11",
+    "react-window-infinite-loader": "^1.0.10",
     "semantic-ui-less": "^2.5.0",
     "semantic-ui-react": "^2.1.0",
     "signalr": "^2.4.1",

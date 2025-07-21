@@ -14,10 +14,22 @@
 }
 
 .browse-error {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   text-align: center;
   font-size: 18px;
   margin-top: 50px;
+  padding: 20px;
+  background-color: #fff6f6;
+  border: 1px solid #e0b4b4;
+  border-radius: 4px;
+  color: #9f3a38;
+}
+
+.browse-error .icon {
+  margin-bottom: 10px;
+  font-size: 24px;
 }
 
 .browse-results-row {
@@ -32,7 +44,8 @@
   width: 100% !important;
   white-space: pre;
   overflow: auto !important;
-  max-height: 400px;
+  max-height: 600px;
+  min-height: 500px;
   padding: 1em !important;
   box-shadow: unset !important;
 }
@@ -68,6 +81,11 @@
 
 .browse-tree-card {
   width: 100% !important;
+  min-height: 600px;
+}
+
+.browse-container {
+  min-height: 700px;
 }
 
 .browse-container:last-child {
@@ -100,4 +118,28 @@
 
 .browse-folderlist-icon.selected {
   color: var(--slskd-browse-folderlist-header-selected-color) !important;
+}
+
+/* Collapsible folder styles */
+.browse-folderlist-item {
+  transition: background-color 0.2s ease;
+}
+
+.browse-folderlist-item:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.browse-folderlist-item .chevron {
+  transition: transform 0.2s ease;
+}
+
+.browse-folderlist-item .chevron:hover {
+  color: var(--slskd-browse-folderlist-header-selected-color) !important;
+}
+
+.browse-folderlist-item .folder-count {
+  font-size: 12px;
+  color: #666;
+  margin-left: auto;
+  opacity: 0.7;
 }

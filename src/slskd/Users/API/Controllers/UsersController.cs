@@ -19,14 +19,17 @@ using Microsoft.Extensions.Options;
 
 namespace slskd.Users.API
 {
+    using System;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
+using System.Linq;
     using System.Net;
     using System.Threading.Tasks;
     using Asp.Versioning;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
     using Serilog;
+    using slskd.Users.API.DTO;
 
     using Soulseek;
 
@@ -124,6 +127,78 @@ namespace slskd.Users.API
         }
 
         /// <summary>
+        ///     Retrieves a paginated list of directories from the specified <paramref name="username"/>.
+        /// </summary>
+        /// <param name="username">The username of the user.</param>
+        /// <param name="page">The page number (1-based).</param>
+        /// <param name="pageSize">The number of items per page.</param>
+        /// <param name="search">Optional search term to filter directories.</param>
+        /// <returns></returns>
+        [HttpGet("{username}/browse/paginated")]
+        [Authorize(Policy = AuthPolicy.Any)]
+        [ProducesResponseType(typeof(PaginatedBrowseResponse), 200)]
+        [ProducesResponseType(404)]
+        public async Task<IActionResult> BrowsePaginated(
+            [FromRoute, Required] string username,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 100,
+            [FromQuery] string search = null)
+        {
+            if (Program.IsRelayAgent)
+            {
+                return Forbid();
+            }
+
+            if (page < 1) page = 1;
+            if (pageSize < 1 || pageSize > 1000) pageSize = 100;
+
+            try
+            {
+                var browseResponse = await Client.BrowseAsync(username);
+                var result = browseResponse.Directories;
+                
+                // Filter directories if search term is provided
+                var filteredDirectories = result;
+                if (!string.IsNullOrEmpty(search))
+                {
+                    filteredDirectories = result.Where(d => 
+                        d.Name.Contains(search, StringComparison.OrdinalIgnoreCase)).ToList();
+                }
+
+                var totalCount = filteredDirectories.Count();
+                var totalPages = (int)System.Math.Ceiling((double)totalCount / pageSize);
+                
+                var pagedDirectories = filteredDirectories
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToList();
+
+                var response = new PaginatedBrowseResponse
+                {
+                    Directories = pagedDirectories,
+                    TotalCount = totalCount,
+                    Page = page,
+                    PageSize = pageSize,
+                    TotalPages = totalPages,
+                    HasNextPage = page < totalPages,
+                    HasPreviousPage = page > 1,
+                };
+
+                _ = Task.Run(async () =>
+                {
+                    await Task.Delay(5000);
+                    BrowseTracker.TryRemove(username);
+                });
+
+                return Ok(response);
+            }
+            catch (UserOfflineException ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
+        /// <summary>
         ///     Retrieves the status of the current browse operation for the specified <paramref name="username"/>, if any.
         /// </summary>
         /// <param name="username">The username of the user.</param>
@@ -176,6 +251,82 @@ namespace slskd.Users.API
                 Log.Debug("{Endpoint} response from {User} for directory '{Directory}': {@Response}", nameof(Directory), username, request.Directory, result);
 
                 return Ok(result);
+            }
+            catch (UserOfflineException ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
+        /// <summary>
+        ///     Retrieves a paginated list of files from the specified directory from the specified <paramref name="username"/>.
+        /// </summary>
+        /// <param name="username">The username of the user.</param>
+        /// <param name="directory">The directory path.</param>
+        /// <param name="page">The page number (1-based).</param>
+        /// <param name="pageSize">The number of items per page.</param>
+        /// <param name="search">Optional search term to filter files.</param>
+        /// <returns></returns>
+        [HttpGet("{username}/directory/{directory}/paginated")]
+        [Authorize(Policy = AuthPolicy.Any)]
+        [ProducesResponseType(typeof(PaginatedDirectoryResponse), 200)]
+        [ProducesResponseType(404)]
+        public async Task<IActionResult> DirectoryPaginated(
+            [FromRoute, Required] string username,
+            [FromRoute, Required] string directory,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 100,
+            [FromQuery] string search = null)
+        {
+            if (Program.IsRelayAgent)
+            {
+                return Forbid();
+            }
+
+            if (page < 1) page = 1;
+            if (pageSize < 1 || pageSize > 1000) pageSize = 100;
+
+            try
+            {
+                var directories = await Client.GetDirectoryContentsAsync(username, directory);
+                var result = directories.FirstOrDefault();
+
+                if (result == null)
+                {
+                    return NotFound("Directory not found");
+                }
+
+                // Filter files if search term is provided
+                var filteredFiles = result.Files;
+                if (!string.IsNullOrEmpty(search))
+                {
+                    filteredFiles = result.Files.Where(f => 
+                        f.Filename.Contains(search, StringComparison.OrdinalIgnoreCase)).ToList();
+                }
+
+                var totalCount = filteredFiles.Count();
+                var totalPages = (int)System.Math.Ceiling((double)totalCount / pageSize);
+                
+                var pagedFiles = filteredFiles
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToList();
+
+                var response = new PaginatedDirectoryResponse
+                {
+                    Directory = result,
+                    Files = pagedFiles,
+                    TotalCount = totalCount,
+                    Page = page,
+                    PageSize = pageSize,
+                    TotalPages = totalPages,
+                    HasNextPage = page < totalPages,
+                    HasPreviousPage = page > 1,
+                };
+
+                Log.Debug("{Endpoint} paginated response from {User} for directory '{Directory}': {@Response}", nameof(DirectoryPaginated), username, directory, response);
+
+                return Ok(response);
             }
             catch (UserOfflineException ex)
             {
