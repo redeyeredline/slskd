@@ -1,7 +1,7 @@
-import { browse } from '../../../lib/shares';
-import { CodeEditor, LoaderSegment, Switch } from '../../Shared';
-import React, { useEffect, useState } from 'react';
-import { Button, Icon, Modal } from 'semantic-ui-react';
+import { browse } from "../../../lib/shares";
+import { CodeEditor, LoaderSegment, Switch } from "../../Shared";
+import React, { useEffect, useState } from "react";
+import { Button, Icon, Modal } from "semantic-ui-react";
 
 const ContentsModal = ({ onClose, share, theme }) => {
   const [loading, setLoading] = useState(true);
@@ -22,15 +22,15 @@ const ContentsModal = ({ onClose, share, theme }) => {
         );
 
         for (const file of directoryFilesOrderedByFilename) {
-          lines.push('\t' + file.filename.replace(remotePath, ''));
+          lines.push("\t" + file.filename.replace(remotePath, ""));
         }
 
-        lines.push('');
+        lines.push("");
 
-        return lines.join('\n');
+        return lines.join("\n");
       });
 
-      setContents(directories.join('\n'));
+      setContents(directories.join("\n"));
       setLoading(false);
     };
 
@@ -43,26 +43,19 @@ const ContentsModal = ({ onClose, share, theme }) => {
   }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <Modal
-      onClose={onClose}
-      open={share}
-      size="large"
-    >
+    <Modal onClose={onClose} open={share} size="large">
       <Modal.Header>
         <Icon name="folder" />
         {localPath}
       </Modal.Header>
-      <Modal.Content
-        className="share-ls-content"
-        scrolling
-      >
+      <Modal.Content className="share-ls-content" scrolling>
         <Switch loading={loading && <LoaderSegment className="modal-loader" />}>
           <CodeEditor
             basicSetup={false}
             editable={false}
             style={{ minHeight: 500 }}
             theme={theme}
-            value={contents || ''}
+            value={contents || ""}
           />
         </Switch>
       </Modal.Content>

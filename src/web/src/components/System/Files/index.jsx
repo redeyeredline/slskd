@@ -1,14 +1,14 @@
-import './Files.css';
-import Explorer from './Explorer';
-import React from 'react';
-import { Tab } from 'semantic-ui-react';
+import "./Files.css";
+import Explorer from "./Explorer";
+import React from "react";
+import { Tab } from "semantic-ui-react";
 
 const Files = ({ options } = {}) => {
   const { remoteFileManagement } = options;
 
   const panes = [
     {
-      menuItem: 'Downloads',
+      menuItem: "Downloads",
       render: () => (
         <Tab.Pane>
           <Explorer
@@ -17,10 +17,10 @@ const Files = ({ options } = {}) => {
           />
         </Tab.Pane>
       ),
-      route: 'downloads',
+      route: "downloads",
     },
     {
-      menuItem: 'Incomplete',
+      menuItem: "Incomplete",
       render: () => (
         <Tab.Pane>
           <Explorer
@@ -29,7 +29,7 @@ const Files = ({ options } = {}) => {
           />
         </Tab.Pane>
       ),
-      route: 'incomplete',
+      route: "incomplete",
     },
   ];
 

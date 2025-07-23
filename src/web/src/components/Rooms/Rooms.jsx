@@ -1,10 +1,10 @@
-import { activeRoomKey } from '../../config';
-import * as rooms from '../../lib/rooms';
-import PlaceholderSegment from '../Shared/PlaceholderSegment';
-import RoomMenu from './RoomMenu';
-import RoomUserList from './RoomUserList';
-import React, { Component, createRef } from 'react';
-import { withRouter } from 'react-router-dom';
+import { activeRoomKey } from "../../config";
+import * as rooms from "../../lib/rooms";
+import PlaceholderSegment from "../Shared/PlaceholderSegment";
+import RoomMenu from "./RoomMenu";
+import RoomUserList from "./RoomUserList";
+import React, { Component, createRef } from "react";
+import { withRouter } from "react-router-dom";
 import {
   Button,
   Card,
@@ -16,10 +16,10 @@ import {
   Portal,
   Ref,
   Segment,
-} from 'semantic-ui-react';
+} from "semantic-ui-react";
 
 const initialState = {
-  active: '',
+  active: "",
   contextMenu: {
     message: null,
     open: false,
@@ -48,7 +48,7 @@ class Rooms extends Component {
   componentDidMount() {
     this.setState(
       {
-        active: sessionStorage.getItem(activeRoomKey) || '',
+        active: sessionStorage.getItem(activeRoomKey) || "",
         intervals: {
           messages: window.setInterval(this.fetchActiveRoom, 1_000),
           rooms: window.setInterval(this.fetchJoinedRooms, 500),
@@ -57,7 +57,7 @@ class Rooms extends Component {
       async () => {
         await this.fetchJoinedRooms();
         this.selectRoom(this.state.active || this.getFirstRoom());
-        document.addEventListener('click', this.handleCloseContextMenu);
+        document.addEventListener("click", this.handleCloseContextMenu);
       },
     );
   }
@@ -69,7 +69,7 @@ class Rooms extends Component {
     clearInterval(roomsInterval);
     clearInterval(messagesInterval);
 
-    document.removeEventListener('click', this.handleCloseContextMenu);
+    document.removeEventListener("click", this.handleCloseContextMenu);
 
     this.setState({ intervals: initialState.intervals });
   }
@@ -79,7 +79,7 @@ class Rooms extends Component {
   messageRef = undefined;
 
   getFirstRoom = () => {
-    return this.state.joined.length > 0 ? this.state.joined[0] : '';
+    return this.state.joined.length > 0 ? this.state.joined[0] : "";
   };
 
   fetchJoinedRooms = async () => {
@@ -149,12 +149,12 @@ class Rooms extends Component {
   };
 
   validInput = () =>
-    (this.state.active || '').length > 0 &&
+    (this.state.active || "").length > 0 &&
     (
       (this.messageRef &&
         this.messageRef.current &&
         this.messageRef.current.value) ||
-      ''
+      ""
     ).length > 0;
 
   focusInput = () => {
@@ -163,11 +163,11 @@ class Rooms extends Component {
 
   formatTimestamp = (timestamp) => {
     const date = new Date(timestamp);
-    const dtfUS = new Intl.DateTimeFormat('en', {
-      day: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit',
-      month: 'numeric',
+    const dtfUS = new Intl.DateTimeFormat("en", {
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+      month: "numeric",
     });
 
     return dtfUS.format(date);
@@ -182,7 +182,7 @@ class Rooms extends Component {
     }
 
     await rooms.sendMessage({ message, roomName: active });
-    this.messageRef.current.value = '';
+    this.messageRef.current.value = "";
   };
 
   handleContextMenu = (clickEvent, message) => {
@@ -212,13 +212,13 @@ class Rooms extends Component {
   };
 
   handleUserProfile = () => {
-    this.props.history.push('/users', {
+    this.props.history.push("/users", {
       user: this.state.contextMenu.message.username,
     });
   };
 
   handleBrowseShares = () => {
-    this.props.history.push('/browse', {
+    this.props.history.push("/browse", {
       user: this.state.contextMenu.message.username,
     });
   };
@@ -263,15 +263,9 @@ class Rooms extends Component {
 
     return (
       <div className="rooms">
-        <Segment
-          className="rooms-segment"
-          raised
-        >
+        <Segment className="rooms-segment" raised>
           <div className="rooms-segment-icon">
-            <Icon
-              name="comments"
-              size="big"
-            />
+            <Icon name="comments" size="big" />
           </div>
           <RoomMenu
             active={active}
@@ -281,21 +275,12 @@ class Rooms extends Component {
           />
         </Segment>
         {active?.length === 0 ? (
-          <PlaceholderSegment
-            caption="No rooms to display"
-            icon="comments"
-          />
+          <PlaceholderSegment caption="No rooms to display" icon="comments" />
         ) : (
-          <Card
-            className="room-active-card"
-            raised
-          >
+          <Card className="room-active-card" raised>
             <Card.Content onClick={() => this.focusInput()}>
               <Card.Header>
-                <Icon
-                  color="green"
-                  name="circle"
-                />
+                <Icon color="green" name="circle" />
                 {active}
                 <Icon
                   className="close-button"
@@ -307,10 +292,7 @@ class Rooms extends Component {
               </Card.Header>
               <div className="room">
                 {loading ? (
-                  <Dimmer
-                    active
-                    inverted
-                  >
+                  <Dimmer active inverted>
                     <Loader inverted />
                   </Dimmer>
                 ) : (
@@ -327,13 +309,13 @@ class Rooms extends Component {
                                 }
                               >
                                 <List.Content
-                                  className={`room-message ${message.self ? 'room-message-self' : ''}`}
+                                  className={`room-message ${message.self ? "room-message-self" : ""}`}
                                 >
                                   <span className="room-message-time">
                                     {this.formatTimestamp(message.timestamp)}
                                   </span>
                                   <span className="room-message-name">
-                                    {message.username}:{' '}
+                                    {message.username}:{" "}
                                   </span>
                                   <span className="room-message-message">
                                     {message.message}
@@ -348,14 +330,9 @@ class Rooms extends Component {
                       <Segment className="room-input">
                         <Input
                           action={{
-                            className: 'room-message-button',
+                            className: "room-message-button",
                             disabled: !this.validInput(),
-                            icon: (
-                              <Icon
-                                color="green"
-                                name="send"
-                              />
-                            ),
+                            icon: <Icon color="green" name="send" />,
                             onClick: this.sendMessage,
                           }}
                           fluid
@@ -368,7 +345,7 @@ class Rooms extends Component {
                             />
                           }
                           onKeyUp={(event) =>
-                            event.key === 'Enter' ? this.sendMessage() : ''
+                            event.key === "Enter" ? this.sendMessage() : ""
                           }
                           ref={(input) =>
                             (this.messageRef = input && input.inputRef)

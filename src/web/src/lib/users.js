@@ -20,6 +20,14 @@ export const browse = async ({ username }) => {
   ).data;
 };
 
+export const browseLimited = async ({ username, limit = 1000 }) => {
+  return (
+    await api.get(`/users/${encodeURIComponent(username)}/browse/limited?limit=${limit}`, {
+      timeout: 120_000, // 2 minute timeout for massive users
+    })
+  ).data;
+};
+
 export const browsePaginated = async ({
   username,
   page = 1,
@@ -45,9 +53,15 @@ export const getBrowseStatus = ({ username }) => {
 
 export const getDirectoryContents = async ({ username, directory }) => {
   return (
-    await api.post(`/users/${encodeURIComponent(username)}/directory`, {
+    await api.post(
+      `/users/${encodeURIComponent(username)}/directory`,
+      {
       directory,
-    })
+      },
+      {
+        timeout: 15_000, // 15 second timeout for directory contents
+      },
+    )
   ).data;
 };
 
@@ -67,5 +81,14 @@ export const getDirectoryContentsPaginated = async ({
     await api.get(
       `/users/${encodeURIComponent(username)}/directory/${encodeURIComponent(directory)}/paginated?${parameters.toString()}`,
     )
+  ).data;
+};
+
+export const getDirectoryChildren = async ({ username, parent = '' }) => {
+  const params = parent ? `?parent=${encodeURIComponent(parent)}` : '';
+  return (
+    await api.get(`/users/${encodeURIComponent(username)}/directory-children${params}`, {
+      timeout: 30_000,
+    })
   ).data;
 };

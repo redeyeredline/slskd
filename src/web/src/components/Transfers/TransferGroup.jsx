@@ -1,7 +1,7 @@
-import * as transfers from '../../lib/transfers';
-import TransferList from './TransferList';
-import React, { Component } from 'react';
-import { Button, Card, Icon } from 'semantic-ui-react';
+import * as transfers from "../../lib/transfers";
+import TransferList from "./TransferList";
+import React, { Component } from "react";
+import { Button, Card, Icon } from "semantic-ui-react";
 
 class TransferGroup extends Component {
   constructor(props) {
@@ -111,7 +111,7 @@ class TransferGroup extends Component {
     const { isFolded } = this.state;
 
     const selected = this.getSelectedFiles();
-    const all = selected.length > 1 ? ' Selected' : '';
+    const all = selected.length > 1 ? " Selected" : "";
 
     const allRetryable =
       selected.filter((f) => transfers.isStateRetryable(f.state)).length ===
@@ -124,16 +124,12 @@ class TransferGroup extends Component {
       selected.length;
 
     return (
-      <Card
-        className="transfer-card"
-        key={user.username}
-        raised
-      >
+      <Card className="transfer-card" key={user.username} raised>
         <Card.Content>
           <Card.Header>
             <Icon
               link
-              name={isFolded ? 'chevron right' : 'chevron down'}
+              name={isFolded ? "chevron right" : "chevron down"}
               onClick={() => this.toggleFolded()}
             />
             {user.username}

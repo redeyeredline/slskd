@@ -1,7 +1,6 @@
 /* eslint-disable promise/prefer-await-to-then */
 import './Browse.css';
 import * as users from '../../lib/users';
-import PlaceholderSegment from '../Shared/PlaceholderSegment';
 import Directory from './Directory';
 import DirectoryTree from './DirectoryTree';
 import * as lzString from 'lz-string';
@@ -72,7 +71,7 @@ class Browse extends Component {
           interval: window.setInterval(this.fetchStatus, 500),
         });
 
-        // Use the regular browse API for better efficiency
+        // Use regular browse to get ALL directories, but implement lazy loading
         users
           .browse({ username })
           .then((response) => {
@@ -99,29 +98,28 @@ class Browse extends Component {
             const directoryCount = directories.length;
             const fileCount = directories.reduce((accumulator, directory) => {
               // examine each directory as we process it to see if it contains \ or /, and set separator accordingly
-              if (!separator && directory && directory.name) {
-                if (directory.name.includes('\\')) separator = '\\';
-                else if (directory.name.includes('/')) separator = '/';
+              if (separator === undefined) {
+                if (directory.name.includes('\\')) {
+                  separator = '\\';
+                } else if (directory.name.includes('/')) {
+                  separator = '/';
+                }
               }
 
-              return accumulator + (directory?.fileCount || 0);
+              return accumulator + (directory.fileCount || 0);
             }, 0);
 
             const lockedDirectoryCount = lockedDirectories.length;
-            const lockedFileCount = lockedDirectories.reduce(
-              (accumulator, directory) =>
-                accumulator + (directory?.fileCount || 0),
-              0,
-            );
+            const lockedFileCount = lockedDirectories.reduce((accumulator, directory) => {
+              return accumulator + (directory.fileCount || 0);
+            }, 0);
 
-            directories = directories.concat(
-              lockedDirectories.map((d) => ({ ...d, locked: true })),
-            );
-
-            // Build the directory tree
+            // Create a lazy-loading tree structure
             const tree = this.getDirectoryTree({ directories, separator });
 
-            this.setState({
+            this.setState(
+              {
+                browseState: 'complete',
               info: {
                 directories: directoryCount,
                 files: fileCount,
@@ -130,53 +128,40 @@ class Browse extends Component {
               },
               separator,
               tree,
-            });
-          })
-          .then(() =>
-            this.setState(
-              { browseError: undefined, browseState: 'complete' },
-              () => {
-                this.saveState();
-                // Stop the status polling since browse is complete
-                if (this.state.interval) {
-                  clearInterval(this.state.interval);
-                  this.setState({ interval: undefined });
-                }
               },
-            ),
-          )
+              () => this.saveState(),
+            );
+          })
           .catch((error) => {
             console.error('Browse failed:', error);
 
-            // Provide more specific error messages
-            let errorMessage = 'Failed to browse user';
-            if (error.response?.status === 404) {
-              errorMessage = 'User is offline or not found';
-            } else if (
-              error.code === 'ECONNABORTED' ||
-              error.message?.includes('timeout')
-            ) {
-              errorMessage =
-                'Browse request timed out - user may have too many files';
-            } else if (error.response?.status >= 500) {
-              errorMessage = 'Server error occurred while browsing';
-            } else if (error.message) {
-              errorMessage = error.message;
+            // Enhanced error handling for massive users
+            let errorMessage = error.message || `Failed to browse ${username}`;
+            let originalError = null;
+            
+            if (error.response) {
+              // Server responded with an error
+              if (error.response.status === 408) {
+                errorMessage = `Browse timed out - ${username} may have too many files (try using search to find specific folders)`;
+              } else if (error.response.status === 500) {
+                errorMessage = `Server error - ${username} may have too many files for the server to handle`;
+              } else {
+                errorMessage = error.response.data || errorMessage;
+              }
+              originalError = error;
+            } else if (error.request) {
+              // Request was made but no response received
+              errorMessage = `No response from server - ${username} may have too many files causing a timeout`;
+              originalError = error;
             }
 
-            this.setState(
-              {
-                browseError: { message: errorMessage, originalError: error },
-                browseState: 'error',
+            this.setState({
+              browseError: {
+                message: errorMessage,
+                originalError,
               },
-              () => {
-                // Stop the status polling since browse failed
-                if (this.state.interval) {
-                  clearInterval(this.state.interval);
-                  this.setState({ interval: undefined });
-                }
-              },
-            );
+              browseState: 'error',
+            });
           });
       },
     );
@@ -272,182 +257,96 @@ class Browse extends Component {
     // Sort directories by name for consistent ordering
     validDirectories.sort((a, b) => a.name.localeCompare(b.name));
 
-    // For very large datasets, use a more efficient approach
-    if (validDirectories.length > 5_000) {
-      return this.buildTreeEfficient(validDirectories, separator);
-    }
-
-    // Optimise this process so we only:
-    // - loop through all directories once
-    // - do the split once
-    // - future look ups are done from the Map
-    const depthMap = new Map();
-    for (const d of validDirectories) {
-      if (!d.name || !separator) continue;
-
-      const directoryDepth = d.name.split(separator).length;
-      if (!depthMap.has(directoryDepth)) {
-        depthMap.set(directoryDepth, []);
-      }
-
-      depthMap.get(directoryDepth).push(d);
-    }
-
-    if (depthMap.size === 0) {
-      return [];
-    }
-
-    const depth = Math.min(...Array.from(depthMap.keys()));
-    const rootDirectories = depthMap.get(depth);
-
-    if (!rootDirectories || rootDirectories.length === 0) {
-      return [];
-    }
-
-    return rootDirectories.map((directory) =>
-      this.getChildDirectories(depthMap, directory, separator, depth + 1),
-    );
-  };
-
-  buildTreeEfficient = (directories, separator) => {
-    // Create a map for O(1) lookups
-    const directoryMap = new Map();
-    const rootDirectories = [];
-
-    // First pass: create map and identify root directories
-    for (const directory of directories) {
-      directoryMap.set(directory.name, { ...directory, children: [] });
-
+    // For lazy loading, we want to show all directories but not pre-load their children
+    // Instead, we'll create a flat structure where each directory can be expanded on-demand
+    
+    // Group directories by their top-level path
+    const topLevelMap = new Map();
+    
+    for (const directory of validDirectories) {
       const parts = directory.name.split(separator);
-      if (parts.length === 1) {
-        rootDirectories.push(directoryMap.get(directory.name));
+      const topLevel = parts[0];
+      
+      if (!topLevelMap.has(topLevel)) {
+        topLevelMap.set(topLevel, []);
       }
+      topLevelMap.get(topLevel).push(directory);
     }
-
-    // Second pass: build parent-child relationships
-    for (const directory of directories) {
-      const parts = directory.name.split(separator);
-      if (parts.length > 1) {
-        const parentName = parts.slice(0, -1).join(separator);
-        const parent = directoryMap.get(parentName);
-        if (parent) {
-          parent.children.push(directoryMap.get(directory.name));
-        }
-      }
+    
+    // Create the tree structure with lazy loading support
+    const tree = [];
+    
+    for (const [topLevel, dirs] of topLevelMap) {
+      // Find the directory that represents this top level
+      const topLevelDir = dirs.find(d => d.name === topLevel);
+      
+      // Always allow lazy loading for top-level directories
+      tree.push({
+        ...topLevelDir,
+        hasChildren: true, // Always allow expansion
+        children: [], // Start with empty children - will be loaded on demand
+        childrenLoaded: false, // Flag to track if children have been loaded
+        loading: false, // Flag to show loading state
+      });
     }
-
-    // Sort root directories and children for consistent ordering
-    rootDirectories.sort((a, b) => a.name.localeCompare(b.name));
-
-    // Sort children of each directory
-    for (const directory of rootDirectories) {
-      if (directory.children && directory.children.length > 0) {
-        directory.children.sort((a, b) => a.name.localeCompare(b.name));
-      }
-    }
-
-    return rootDirectories;
-  };
-
-  getChildDirectories = (depthMap, root, separator, depth) => {
-    // Safety checks for root object
-    if (!root || !root.name || !separator) {
-      return { ...root, children: [] };
-    }
-
-    if (!depthMap.has(depth)) {
-      return { ...root, children: [] };
-    }
-
-    const children = depthMap
-      .get(depth)
-      .filter((d) => d && d.name && d.name.startsWith(root.name))
-      .sort((a, b) => a.name.localeCompare(b.name));
-
-    return {
-      ...root,
-      children: children.map((c) =>
-        this.getChildDirectories(depthMap, c, separator, depth + 1),
-      ),
-    };
+    
+    return tree;
   };
 
   selectDirectory = (directory) => {
-    // Check if the directory has children (subdirectories)
-    const hasChildren = directory.children && directory.children.length > 0;
+    console.log('Selecting directory:', {
+      name: directory.name,
+      hasChildren: directory.hasChildren,
+      childrenLoaded: directory.childrenLoaded,
+      childrenCount: directory.children ? directory.children.length : 0,
+    });
 
-    if (hasChildren) {
-      // If directory has children, display them as subdirectories
-      console.log('Directory children (raw):', directory.children);
-      for (const child of directory.children) {
-        console.log(
-          'Child:',
-          child.name,
-          'fileCount:',
-          child.fileCount,
-          'directoryCount:',
-          child.directoryCount,
-        );
-      }
-
-      const subdirectories = directory.children.map((child) => {
-        const name = child.name.split('\\').pop().split('/').pop();
-        console.log('Constructing subdir:', {
-          fileCount: child.fileCount,
-          fullPath: child.name,
-          name,
-        });
-        return {
-          fileCount: child.fileCount,
-          fullPath: child.name,
-          name,
-        };
-      });
-      console.log('Constructed subdirectories:', subdirectories);
-
-      this.setState(
-        {
-          selectedDirectory: {
-            ...directory,
-            children: [],
-            files: [],
-            subdirectories,
-          },
-        },
-        () => {
-          this.saveState();
-        },
-      );
-    } else {
-      // If no children, fetch directory contents from API
-      this.setState(
-        { selectedDirectory: { ...directory, children: [] } },
-        () => {
-          this.saveState();
-          this.fetchDirectoryContents(directory.name);
-        },
-      );
-    }
+    // Always fetch directory contents from API to get both files and subdirectories
+    console.log('Fetching directory contents from API for:', directory.name);
+    this.setState(
+      { selectedDirectory: { ...directory, children: [], loading: true } },
+      () => {
+        this.saveState();
+        this.fetchDirectoryContents(directory.name);
+      },
+    );
   };
 
   fetchDirectoryContents = async (directoryPath) => {
     const { username } = this.state;
     if (!username || !directoryPath) return;
 
+    console.log('Fetching directory contents for:', { username, directoryPath });
+
     try {
-      const response = await users.getDirectoryContents({
-        directory: directoryPath,
+      // Use the directory-children endpoint instead, which we know works
+      const response = await users.getDirectoryChildren({
         username,
+        parent: directoryPath,
       });
 
+      console.log('Directory children response:', response);
+
       if (response) {
+        const files = response.files || [];
+        const subdirectories = response.subdirectories || [];
+        
+        console.log('Extracted files:', files);
+        console.log('Extracted subdirectories:', subdirectories);
+        
         this.setState((previousState) => ({
           selectedDirectory: {
             ...previousState.selectedDirectory,
-            files: response.files || [],
-            subdirectories: response.directories || [],
+            files: files,
+            subdirectories: subdirectories.map(dir => ({
+              name: dir.name.split('\\').pop().split('/').pop(),
+              fullPath: dir.name,
+              fileCount: dir.fileCount || 0,
+            })),
           },
-        }));
+        }), () => {
+          console.log('Updated selectedDirectory:', this.state.selectedDirectory);
+        });
       }
     } catch (error) {
       console.error('Failed to fetch directory contents:', error);
@@ -466,6 +365,14 @@ class Browse extends Component {
     this.setState({ selectedDirectory: initialState.selectedDirectory }, () =>
       this.saveState(),
     );
+  };
+
+  triggerLazyLoadForDirectory = (directory) => {
+    // This method will be called when we need to trigger lazy loading for a selected directory
+    // We'll pass this to the DirectoryTree component
+    if (this.directoryTreeRef && this.directoryTreeRef.triggerLazyLoad) {
+      this.directoryTreeRef.triggerLazyLoad(directory);
+    }
   };
 
   render() {
@@ -492,14 +399,9 @@ class Browse extends Component {
     return (
       <div className="search-container">
         <Segment
+          basic
           className="browse-segment"
-          style={{
-            background: '#181a1b',
-            border: '1px solid #333',
-            borderRadius: '10px',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
-            marginBottom: '20px',
-          }}
+          style={{ borderRadius: '10px', marginBottom: '20px' }}
         >
           <div className="browse-segment-icon">
             <Icon
@@ -574,34 +476,37 @@ class Browse extends Component {
                 </Button>
               </div>
             ) : (
-              <div className="browse-container" style={{
-                background: '#181a1b',
-                border: '1px solid #333',
-                borderRadius: '10px',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
-                padding: '16px',
-              }}>
+              <div
+                className="browse-container"
+                style={{
+                  borderRadius: '10px',
+                  padding: '16px',
+                }}
+              >
                 {emptyTree ? (
-                  <div style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: '#666',
-                    padding: '40px 0',
-                  }}>
-                    <Icon name="folder open" size="huge" style={{ marginBottom: 16, color: '#444' }} />
-                    <div style={{ fontSize: '1.2em' }}>No user share to display</div>
+                  <div
+                    style={{
+                      alignItems: 'center',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'center',
+                      padding: '40px 0',
+                    }}
+                  >
+                    <Icon
+                      name="folder open"
+                      size="huge"
+                      style={{ marginBottom: 16 }}
+                    />
+                    <div style={{ fontSize: '1.2em' }}>
+                      No user share to display
+                    </div>
                   </div>
                 ) : (
                   <Card
+                    basic
                     className="browse-tree-card"
-                    style={{
-                      background: '#181a1b',
-                      border: '1px solid #333',
-                      borderRadius: '10px',
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
-                    }}
+                    style={{ borderRadius: '10px' }}
                   >
                     <Card.Content>
                       <Card.Header>
@@ -617,16 +522,17 @@ class Browse extends Component {
                           {/* eslint-disable-line max-len */}
                         </span>
                       </Card.Meta>
-                      <Segment className="browse-folderlist" style={{
-                        background: '#181a1b',
-                        border: '1px solid #333',
-                        borderRadius: '10px',
-                        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                      }}>
+                      <Segment
+                        basic
+                        className="browse-folderlist"
+                        style={{ borderRadius: '10px' }}
+                      >
                         <DirectoryTree
+                          ref={(ref) => (this.directoryTreeRef = ref)}
                           onSelect={(_, value) => this.selectDirectory(value)}
                           selectedDirectoryName={name}
                           tree={tree}
+                          username={username}
                         />
                       </Segment>
                     </Card.Content>

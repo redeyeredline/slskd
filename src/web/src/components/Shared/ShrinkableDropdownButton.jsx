@@ -1,6 +1,6 @@
-import ShrinkableButton from './ShrinkableButton';
-import React from 'react';
-import { Button, Dropdown } from 'semantic-ui-react';
+import ShrinkableButton from "./ShrinkableButton";
+import React from "react";
+import { Button, Dropdown } from "semantic-ui-react";
 
 const ShrinkableDropdownButton = ({
   children,

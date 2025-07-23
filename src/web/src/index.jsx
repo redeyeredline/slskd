@@ -1,12 +1,13 @@
-import 'semantic-ui-less/semantic.less';
-import App from './components/App';
-import React from 'react';
-import ReactDOM from 'react-dom';
-import { BrowserRouter as Router } from 'react-router-dom';
+import "semantic-ui-less/semantic.less";
+import App from "./components/App";
+import React from "react";
+import { createRoot } from 'react-dom/client';
+import { BrowserRouter as Router } from "react-router-dom";
 
-ReactDOM.render(
+const container = document.getElementById('root');
+const root = createRoot(container);
+root.render(
   <Router>
     <App />
-  </Router>,
-  document.querySelector('#root'),
+  </Router>
 );

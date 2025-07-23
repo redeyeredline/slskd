@@ -1,8 +1,8 @@
-import { getCurrentDebugView } from '../../../lib/options';
-import { CodeEditor, PlaceholderSegment, Switch } from '../../Shared';
-import React, { useEffect, useState } from 'react';
-import { toast } from 'react-toastify';
-import { Button, Icon, Modal } from 'semantic-ui-react';
+import { getCurrentDebugView } from "../../../lib/options";
+import { CodeEditor, PlaceholderSegment, Switch } from "../../Shared";
+import React, { useEffect, useState } from "react";
+import { toast } from "react-toastify";
+import { Button, Icon, Modal } from "semantic-ui-react";
 
 const DebugModal = ({ onClose, open, theme }) => {
   const [loading, setLoading] = useState(true);
@@ -28,19 +28,12 @@ const DebugModal = ({ onClose, open, theme }) => {
   }, [open]);
 
   return (
-    <Modal
-      onClose={onClose}
-      open={open}
-      size="large"
-    >
+    <Modal onClose={onClose} open={open} size="large">
       <Modal.Header>
         <Icon name="bug" />
         Options (Debug View)
       </Modal.Header>
-      <Modal.Content
-        className="debug-view-content"
-        scrolling
-      >
+      <Modal.Content className="debug-view-content" scrolling>
         <Switch loading={loading && <PlaceholderSegment loading />}>
           <CodeEditor
             basicSetup={false}

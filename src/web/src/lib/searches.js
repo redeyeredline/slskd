@@ -1,7 +1,7 @@
-import api from './api';
+import api from "./api";
 
 export const getAll = async () => {
-  return (await api.get('/searches')).data;
+  return (await api.get("/searches")).data;
 };
 
 export const stop = ({ id }) => {
@@ -13,7 +13,7 @@ export const remove = ({ id }) => {
 };
 
 export const create = ({ id, searchText }) => {
-  return api.post('/searches', { id, searchText });
+  return api.post("/searches", { id, searchText });
 };
 
 export const getStatus = async ({ id, includeResponses = false }) => {
@@ -30,7 +30,7 @@ export const getResponses = async ({ id }) => {
   ).data;
 
   if (!Array.isArray(response)) {
-    console.warn('got non-array response from searches API', response);
+    console.warn("got non-array response from searches API", response);
     return undefined;
   }
 
@@ -83,19 +83,19 @@ export const parseFiltersFromString = (string) => {
 
   const terms = string
     .toLowerCase()
-    .split(' ')
+    .split(" ")
     .filter(
       (term) =>
-        !term.includes(':') &&
-        term !== 'isvbr' &&
-        term !== 'iscbr' &&
-        term !== 'islossless' &&
-        term !== 'islossy',
+        !term.includes(":") &&
+        term !== "isvbr" &&
+        term !== "iscbr" &&
+        term !== "islossless" &&
+        term !== "islossy",
     );
 
-  filters.include = terms.filter((term) => !term.startsWith('-'));
+  filters.include = terms.filter((term) => !term.startsWith("-"));
   filters.exclude = terms
-    .filter((term) => term.startsWith('-'))
+    .filter((term) => term.startsWith("-"))
     .map((term) => term.slice(1));
 
   return filters;

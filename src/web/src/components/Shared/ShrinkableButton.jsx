@@ -1,6 +1,6 @@
-import React from 'react';
-import { useMediaQuery } from 'react-responsive';
-import { Button, Icon, Popup } from 'semantic-ui-react';
+import React from "react";
+import { useMediaQuery } from "react-responsive";
+import { Button, Icon, Popup } from "semantic-ui-react";
 
 const ShrinkableButton = ({ children, icon, loading, mediaQuery, ...rest }) => {
   const shouldShrink = useMediaQuery({ query: mediaQuery });
@@ -8,10 +8,7 @@ const ShrinkableButton = ({ children, icon, loading, mediaQuery, ...rest }) => {
   if (!shouldShrink) {
     return (
       <Button {...rest}>
-        <Icon
-          loading={loading}
-          name={icon}
-        />
+        <Icon loading={loading} name={icon} />
         {children}
       </Button>
     );
@@ -21,14 +18,8 @@ const ShrinkableButton = ({ children, icon, loading, mediaQuery, ...rest }) => {
     <Popup
       content={children}
       trigger={
-        <Button
-          icon
-          {...rest}
-        >
-          <Icon
-            loading={loading}
-            name={icon}
-          />
+        <Button icon {...rest}>
+          <Icon loading={loading} name={icon} />
         </Button>
       }
     />

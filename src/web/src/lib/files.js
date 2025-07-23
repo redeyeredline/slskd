@@ -1,6 +1,6 @@
-import api from './api';
+import api from "./api";
 
-export const list = async ({ root, subdirectory = '' }) => {
+export const list = async ({ root, subdirectory = "" }) => {
   const response = (
     await api.get(`/files/${root}/directories/${btoa(subdirectory)}`)
   ).data;

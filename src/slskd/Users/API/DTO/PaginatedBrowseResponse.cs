@@ -15,29 +15,28 @@
 //     along with this program.  If not, see https://www.gnu.org/licenses/.
 // </copyright>
 
-using System.Collections.Generic;
-
 namespace slskd.Users.API.DTO
 {
+    using System.Collections.Generic;
     using Soulseek;
 
     /// <summary>
-    ///     Paginated browse response.
+    ///     A paginated browse response.
     /// </summary>
     public class PaginatedBrowseResponse
     {
         /// <summary>
-        ///     Gets or sets the directories for the current page.
+        ///     Gets or sets the directories.
         /// </summary>
-        public IEnumerable<Directory> Directories { get; set; } = new List<Directory>();
+        public IEnumerable<Soulseek.Directory> Directories { get; set; }
 
         /// <summary>
-        ///     Gets or sets the total count of directories.
+        ///     Gets or sets the total count.
         /// </summary>
         public int TotalCount { get; set; }
 
         /// <summary>
-        ///     Gets or sets the current page number.
+        ///     Gets or sets the page.
         /// </summary>
         public int Page { get; set; }
 
@@ -47,7 +46,7 @@ namespace slskd.Users.API.DTO
         public int PageSize { get; set; }
 
         /// <summary>
-        ///     Gets or sets the total number of pages.
+        ///     Gets or sets the total pages.
         /// </summary>
         public int TotalPages { get; set; }
 
@@ -60,5 +59,46 @@ namespace slskd.Users.API.DTO
         ///     Gets or sets a value indicating whether there is a previous page.
         /// </summary>
         public bool HasPreviousPage { get; set; }
+    }
+
+    /// <summary>
+    ///     A limited browse response for users with massive file counts.
+    /// </summary>
+    public class LimitedBrowseResponse
+    {
+        /// <summary>
+        ///     Gets or sets the directories (limited subset).
+        /// </summary>
+        public IEnumerable<Soulseek.Directory> Directories { get; set; }
+
+        /// <summary>
+        ///     Gets or sets the total count of directories in the user's share.
+        /// </summary>
+        public int TotalCount { get; set; }
+
+        /// <summary>
+        ///     Gets or sets the number of directories returned in this response.
+        /// </summary>
+        public int LimitedCount { get; set; }
+
+        /// <summary>
+        ///     Gets or sets a value indicating whether the response was limited.
+        /// </summary>
+        public bool IsLimited { get; set; }
+
+        /// <summary>
+        ///     Gets or sets the limit applied to this response.
+        /// </summary>
+        public int Limit { get; set; }
+    }
+
+    /// <summary>
+    ///     Response for immediate children of a directory.
+    /// </summary>
+    public class DirectoryChildrenResponse
+    {
+        public IEnumerable<Soulseek.Directory> Subdirectories { get; set; }
+        public IEnumerable<Soulseek.File> Files { get; set; }
+        public string Separator { get; set; }
     }
 } 

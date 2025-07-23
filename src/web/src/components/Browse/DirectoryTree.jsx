@@ -1,6 +1,7 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useCallback, useImperativeHandle } from 'react';
 import { FixedSizeList as VirtualList } from 'react-window';
-import { Icon, List } from 'semantic-ui-react';
+import { Icon, List, Loader } from 'semantic-ui-react';
+import * as users from '../../lib/users';
 
 // Flatten the tree structure for virtual scrolling with collapse support
 const flattenTree = (
@@ -11,17 +12,25 @@ const flattenTree = (
 ) => {
   const items = [];
 
-  for (const item of tree) {
+  // Sort the tree items alphabetically by display name
+  const sortedTree = [...tree].sort((a, b) => {
+    const aName = a.name.split('\\').pop().split('/').pop().toLowerCase();
+    const bName = b.name.split('\\').pop().split('/').pop().toLowerCase();
+    return aName.localeCompare(bName);
+  });
+
+  for (const item of sortedTree) {
     const currentPath = path ? `${path}\\${item.name}` : item.name;
     const isCollapsed = collapsedPaths.has(currentPath);
 
     items.push({
       ...item,
       displayName: item.name.split('\\').pop().split('/').pop(),
-      hasChildren: item.children && item.children.length > 0,
+      hasChildren: item.hasChildren,
       isCollapsed,
       level,
-      path: currentPath,
+      path: currentPath, // Use the constructed path to match collapsedPaths keys
+      loading: item.loading,
     });
 
     // Only add children if the folder is not collapsed
@@ -39,6 +48,7 @@ const DirectoryTreeItem = ({
   item,
   onSelect,
   onToggleCollapse,
+  onLazyLoad,
   selectedDirectoryName,
   style,
 }) => {
@@ -46,13 +56,31 @@ const DirectoryTreeItem = ({
   const isLocked = item.locked === true;
 
   const handleClick = (event) => {
-    // Always select the directory when clicking on the folder name
     onSelect(event, item);
   };
 
-  const handleSelect = (event) => {
-    // Select the directory
-    onSelect(event, item);
+  const handleToggle = (event) => {
+    event.stopPropagation();
+    
+    console.log('Toggle clicked:', {
+      itemName: item.name,
+      isCollapsed: item.isCollapsed,
+      hasChildren: item.hasChildren,
+      childrenLoaded: item.childrenLoaded,
+      loading: item.loading,
+    });
+    
+    // If children aren't loaded yet, load them first
+    if (item.hasChildren && !item.childrenLoaded && !item.loading) {
+      console.log('Triggering lazy load for:', item.name);
+      onLazyLoad(item);
+      return;
+    }
+    
+    // If children are loaded, toggle the collapsed state
+    if (item.childrenLoaded && item.children && item.children.length > 0) {
+      onToggleCollapse(item.path);
+    }
   };
 
   return (
@@ -83,42 +111,36 @@ const DirectoryTreeItem = ({
             }}
           >
             {item.hasChildren && (
-              <Icon
-                name={item.isCollapsed ? 'chevron right' : 'chevron down'}
-                onClick={(event) => {
-                  event.stopPropagation();
-                  onToggleCollapse(item.path);
-                }}
-                size="small"
-                style={{
-                  color: '#666',
-                  cursor: 'pointer',
-                  marginRight: '4px',
-                }}
-              />
-            )}
-            <button
-              onClick={handleSelect}
-              style={{
-                background: 'none',
-                border: 'none',
-                color: 'inherit',
-                cursor: 'pointer',
-                font: 'inherit',
-                padding: 0,
-                textAlign: 'left',
-              }}
-              type="button"
-            >
-              {item.displayName}
-            </button>
-            {item.hasChildren && (
-              <span
-                style={{ color: '#666', fontSize: '12px', marginLeft: 'auto' }}
-              >
-                ({item.children?.length || 0})
+              <span style={{ display: 'flex', alignItems: 'center' }}>
+                {item.childrenLoaded && item.children && item.children.length > 0 ? (
+                  // Only show chevron if children are actually loaded AND there are children
+                  <Icon
+                    name={item.isCollapsed ? 'chevron right' : 'chevron down'}
+                    onClick={handleToggle}
+                    size="small"
+                    style={{
+                      color: '#666',
+                      cursor: 'pointer',
+                      marginRight: '4px',
+                    }}
+                  />
+                ) : (
+                  // Show a plus icon for unloaded folders or folders with no children
+                  <Icon
+                    name="plus"
+                    onClick={handleToggle}
+                    size="small"
+                    style={{
+                      color: '#666',
+                      cursor: 'pointer',
+                      marginRight: '4px',
+                    }}
+                  />
+                )}
+                {item.loading && <Loader active inline size="tiny" />}
               </span>
             )}
+            <span>{item.displayName}</span>
           </List.Header>
         </List.Content>
       </List.Item>
@@ -126,33 +148,114 @@ const DirectoryTreeItem = ({
   );
 };
 
-const DirectoryTree = ({ onSelect, selectedDirectoryName, tree }) => {
+const DirectoryTree = React.forwardRef(({ onSelect, selectedDirectoryName, tree, username }, ref) => {
   const [listHeight, setListHeight] = useState(500);
   const [collapsedPaths, setCollapsedPaths] = useState(new Set());
   const [controlBarHeight, setControlBarHeight] = useState(0);
+  const [treeState, setTreeState] = useState(tree);
+
+  // Expose methods to parent component
+  useImperativeHandle(ref, () => ({
+    triggerLazyLoad: (directory) => {
+      console.log('Triggering lazy load for directory:', directory.name);
+      handleLazyLoad(directory);
+    },
+  }));
+
+  // Expose methods to parent component
+  useImperativeHandle(ref, () => ({
+    triggerLazyLoad: (directory) => {
+      console.log('Triggering lazy load for directory:', directory.name);
+      handleLazyLoad(directory);
+    },
+  }));
+
+  // Helper to update a node in the tree by path
+  const updateNodeByPath = useCallback((treeData, path, updater) => {
+    return treeData.map((node) => {
+      if (node.name === path) {
+        return updater(node);
+      }
+      if (node.children) {
+        return {
+          ...node,
+          children: updateNodeByPath(node.children, path, updater),
+        };
+      }
+      return node;
+    });
+  }, []);
+
+  // Lazy load children when a folder is expanded
+  const handleLazyLoad = useCallback(
+    async (item) => {
+      console.log('Lazy loading for item:', item);
+      console.log('Username:', username);
+      console.log('Parent path:', item.name);
+      
+      setTreeState((prevTree) =>
+        updateNodeByPath(prevTree, item.name, (node) => ({ ...node, loading: true })),
+      );
+      try {
+        const response = await users.getDirectoryChildren({ username, parent: item.name });
+        console.log('Directory children response:', response);
+        
+        if (response && response.subdirectories) {
+          setTreeState((prevTree) =>
+            updateNodeByPath(prevTree, item.name, (node) => ({
+              ...node,
+              children: response.subdirectories.map((d) => ({
+                ...d,
+                hasChildren: true, // Assume all can have children for now
+                children: [],
+                childrenLoaded: false,
+              })),
+              childrenLoaded: true,
+              loading: false,
+            })),
+          );
+        } else {
+          console.log('No subdirectories in response');
+          setTreeState((prevTree) =>
+            updateNodeByPath(prevTree, item.name, (node) => ({
+              ...node,
+              children: [],
+              childrenLoaded: true,
+              loading: false,
+            })),
+          );
+        }
+      } catch (error) {
+        console.error('Error loading directory children:', error);
+        setTreeState((prevTree) =>
+          updateNodeByPath(prevTree, item.name, (node) => ({ ...node, loading: false })),
+        );
+      }
+    },
+    [username, updateNodeByPath],
+  );
 
   // Get all folder paths that have children
   const allFolderPaths = useMemo(() => {
-    const getPaths = (treeData, path = '') => {
+    const getPaths = (treeData) => {
       const paths = [];
       for (const item of treeData) {
-        const currentPath = path ? `${path}\\${item.name}` : item.name;
-        if (item.children && item.children.length > 0) {
-          paths.push(currentPath);
-          paths.push(...getPaths(item.children, currentPath));
+        if (item.hasChildren) {
+          paths.push(item.name); // Use original name
+          if (item.children && item.children.length > 0) {
+            paths.push(...getPaths(item.children));
+          }
         }
       }
-
       return paths;
     };
-
-    return getPaths(tree || []);
-  }, [tree]);
+    return getPaths(treeState || []);
+  }, [treeState]);
 
   // Flatten the tree for virtual scrolling with collapse support
   const flattenedItems = useMemo(() => {
-    return flattenTree(tree || [], 0, '', collapsedPaths);
-  }, [collapsedPaths, tree]);
+    return flattenTree(treeState || [], 0, '', collapsedPaths);
+  }, [collapsedPaths, treeState]);
 
   // Toggle collapse state for a folder
   const handleToggleCollapse = (path) => {
@@ -163,7 +266,6 @@ const DirectoryTree = ({ onSelect, selectedDirectoryName, tree }) => {
       } else {
         newSet.add(path);
       }
-
       return newSet;
     });
   };
@@ -185,12 +287,12 @@ const DirectoryTree = ({ onSelect, selectedDirectoryName, tree }) => {
   const renderItem = ({ index, style }) => {
     const item = flattenedItems[index];
     if (!item) return null;
-
     return (
       <DirectoryTreeItem
         item={item}
         onSelect={onSelect}
         onToggleCollapse={handleToggleCollapse}
+        onLazyLoad={handleLazyLoad}
         selectedDirectoryName={selectedDirectoryName}
         style={style}
       />
@@ -207,27 +309,22 @@ const DirectoryTree = ({ onSelect, selectedDirectoryName, tree }) => {
         const viewportHeight = window.innerHeight;
         const containerTop = containerRect.top;
         const availableHeight = viewportHeight - containerTop - 100; // Leave space for bottom content
-
         const height = Math.min(container.clientHeight - 80, availableHeight);
         setListHeight(Math.max(height, 400)); // Ensure minimum height
       }
     };
-
-    // Update immediately and then with delays to ensure DOM is ready
     updateHeight();
     const timer = setTimeout(updateHeight, 50);
     const timer2 = setTimeout(updateHeight, 200);
     const timer3 = setTimeout(updateHeight, 500);
-
     window.addEventListener('resize', updateHeight);
-
     return () => {
       clearTimeout(timer);
       clearTimeout(timer2);
       clearTimeout(timer3);
       window.removeEventListener('resize', updateHeight);
     };
-  }, [flattenedItems.length]); // Recalculate when items change
+  }, [flattenedItems.length]);
 
   if (!flattenedItems.length) {
     return (
@@ -317,7 +414,6 @@ const DirectoryTree = ({ onSelect, selectedDirectoryName, tree }) => {
           </span>
         </div>
       )}
-
       <div
         style={{
           height:
@@ -342,6 +438,8 @@ const DirectoryTree = ({ onSelect, selectedDirectoryName, tree }) => {
       </div>
     </div>
   );
-};
+});
+
+DirectoryTree.displayName = 'DirectoryTree';
 
 export default DirectoryTree;

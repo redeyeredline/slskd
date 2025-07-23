@@ -1,13 +1,13 @@
-import './Chat.css';
-import React, { useEffect } from 'react';
-import { Button, Form, Header, Icon, Input, Modal } from 'semantic-ui-react';
+import "./Chat.css";
+import React, { useEffect } from "react";
+import { Button, Form, Header, Icon, Input, Modal } from "semantic-ui-react";
 
 const usernameRef = React.createRef();
 
 const SendMessageModal = ({ initiateConversation, ...rest }) => {
   const [open, setOpen] = React.useState(false);
-  const [username, setUsername] = React.useState('');
-  const [message, setMessage] = React.useState('');
+  const [username, setUsername] = React.useState("");
+  const [message, setMessage] = React.useState("");
 
   useEffect(() => {
     if (open) {
@@ -59,11 +59,7 @@ const SendMessageModal = ({ initiateConversation, ...rest }) => {
       </Modal.Content>
       <Modal.Actions>
         <Button onClick={() => setOpen(false)}>Cancel</Button>
-        <Button
-          disabled={!validInput()}
-          onClick={() => sendMessage()}
-          positive
-        >
+        <Button disabled={!validInput()} onClick={() => sendMessage()} positive>
           Send
         </Button>
       </Modal.Actions>

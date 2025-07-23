@@ -1,6 +1,6 @@
-import * as search from './searches';
+import * as search from "./searches";
 
-describe('filterResponse', () => {
+describe("filterResponse", () => {
   it('removes VBR files if "iscbr" is specified', () => {
     const response = {
       files: [
@@ -73,7 +73,7 @@ describe('filterResponse', () => {
     });
   });
 
-  it('removes files with bitRate less than minBitRate', () => {
+  it("removes files with bitRate less than minBitRate", () => {
     const response = {
       files: [{ bitRate: 100 }, { bitRate: 99 }],
     };
@@ -85,7 +85,7 @@ describe('filterResponse', () => {
     });
   });
 
-  it('removes files with size less than minFileSize', () => {
+  it("removes files with size less than minFileSize", () => {
     const response = {
       files: [{ size: 100 }, { size: 99 }],
     };
@@ -97,7 +97,7 @@ describe('filterResponse', () => {
     });
   });
 
-  it('removes files with length less than minLength', () => {
+  it("removes files with length less than minLength", () => {
     const response = {
       files: [{ length: 100 }, { length: 99 }],
     };
@@ -109,150 +109,150 @@ describe('filterResponse', () => {
     });
   });
 
-  describe('term filtering', () => {
+  describe("term filtering", () => {
     const response = {
       files: [
-        { filename: '/path/to/foo.mp3' },
-        { filename: '/path/to/bar.mp3' },
-        { filename: '/path/to/baz.mp3' },
-        { filename: '/path/to/qux.mp3' },
-        { filename: '/path/to/info.nfo' },
-        { filename: '/path/to/folder.jpg' },
+        { filename: "/path/to/foo.mp3" },
+        { filename: "/path/to/bar.mp3" },
+        { filename: "/path/to/baz.mp3" },
+        { filename: "/path/to/qux.mp3" },
+        { filename: "/path/to/info.nfo" },
+        { filename: "/path/to/folder.jpg" },
       ],
     };
 
-    it('removes files with filenames not containing included phrases', () => {
-      const filters = { include: ['path', 'to', '.nfo'] };
+    it("removes files with filenames not containing included phrases", () => {
+      const filters = { include: ["path", "to", ".nfo"] };
 
       expect(search.filterResponse({ filters, response })).toMatchObject({
-        files: [{ filename: '/path/to/info.nfo' }],
+        files: [{ filename: "/path/to/info.nfo" }],
       });
     });
 
-    it('removes files with filenames containing excluded phrases', () => {
-      const filters = { exclude: ['bar', 'jpg', 'qux'] };
+    it("removes files with filenames containing excluded phrases", () => {
+      const filters = { exclude: ["bar", "jpg", "qux"] };
 
       expect(search.filterResponse({ filters, response })).toMatchObject({
         files: [
-          { filename: '/path/to/foo.mp3' },
-          { filename: '/path/to/baz.mp3' },
-          { filename: '/path/to/info.nfo' },
+          { filename: "/path/to/foo.mp3" },
+          { filename: "/path/to/baz.mp3" },
+          { filename: "/path/to/info.nfo" },
         ],
       });
     });
 
-    it('removes a mix of includes and excludes', () => {
+    it("removes a mix of includes and excludes", () => {
       const filters = {
-        exclude: ['foo', 'bar'],
-        include: ['path', '.mp3'],
+        exclude: ["foo", "bar"],
+        include: ["path", ".mp3"],
       };
 
       expect(search.filterResponse({ filters, response })).toMatchObject({
         files: [
-          { filename: '/path/to/baz.mp3' },
-          { filename: '/path/to/qux.mp3' },
+          { filename: "/path/to/baz.mp3" },
+          { filename: "/path/to/qux.mp3" },
         ],
       });
     });
   });
 });
 
-describe('parseFiltersFromString', () => {
-  it('returns correct minBitrate', () => {
-    expect(search.parseFiltersFromString('foo minbr:42 bar')).toMatchObject({
+describe("parseFiltersFromString", () => {
+  it("returns correct minBitrate", () => {
+    expect(search.parseFiltersFromString("foo minbr:42 bar")).toMatchObject({
       minBitRate: 42,
     });
 
     expect(
-      search.parseFiltersFromString('foo minbitrate:123 bar'),
+      search.parseFiltersFromString("foo minbitrate:123 bar"),
     ).toMatchObject({
       minBitRate: 123,
     });
   });
 
-  it('returns correct minFileSize', () => {
-    expect(search.parseFiltersFromString('foo minfs:42 bar')).toMatchObject({
+  it("returns correct minFileSize", () => {
+    expect(search.parseFiltersFromString("foo minfs:42 bar")).toMatchObject({
       minFileSize: 42,
     });
 
     expect(
-      search.parseFiltersFromString('foo minfilesize:123 bar'),
+      search.parseFiltersFromString("foo minfilesize:123 bar"),
     ).toMatchObject({
       minFileSize: 123,
     });
   });
 
-  it('returns correct minLength', () => {
-    expect(search.parseFiltersFromString('foo minlen:42 bar')).toMatchObject({
+  it("returns correct minLength", () => {
+    expect(search.parseFiltersFromString("foo minlen:42 bar")).toMatchObject({
       minLength: 42,
     });
 
     expect(
-      search.parseFiltersFromString('foo minlength:123 bar'),
+      search.parseFiltersFromString("foo minlength:123 bar"),
     ).toMatchObject({
       minLength: 123,
     });
   });
 
-  it('returns correct minFilesInFolder', () => {
-    expect(search.parseFiltersFromString('foo minfif:42 bar')).toMatchObject({
+  it("returns correct minFilesInFolder", () => {
+    expect(search.parseFiltersFromString("foo minfif:42 bar")).toMatchObject({
       minFilesInFolder: 42,
     });
 
     expect(
-      search.parseFiltersFromString('foo minfilesinfolder:123 bar'),
+      search.parseFiltersFromString("foo minfilesinfolder:123 bar"),
     ).toMatchObject({
       minFilesInFolder: 123,
     });
   });
 
-  it('returns correct list of terms', () => {
-    expect(search.parseFiltersFromString('foo minbr:42 bar')).toMatchObject({
-      include: ['foo', 'bar'],
+  it("returns correct list of terms", () => {
+    expect(search.parseFiltersFromString("foo minbr:42 bar")).toMatchObject({
+      include: ["foo", "bar"],
     });
 
-    expect(search.parseFiltersFromString('foo iscbr isvbr bar')).toMatchObject({
-      include: ['foo', 'bar'],
+    expect(search.parseFiltersFromString("foo iscbr isvbr bar")).toMatchObject({
+      include: ["foo", "bar"],
     });
 
-    expect(search.parseFiltersFromString('foo some:thing bar')).toMatchObject({
-      include: ['foo', 'bar'],
+    expect(search.parseFiltersFromString("foo some:thing bar")).toMatchObject({
+      include: ["foo", "bar"],
     });
 
-    expect(search.parseFiltersFromString('foo -bar')).toMatchObject({
-      exclude: ['bar'],
-      include: ['foo'],
+    expect(search.parseFiltersFromString("foo -bar")).toMatchObject({
+      exclude: ["bar"],
+      include: ["foo"],
     });
 
-    expect(search.parseFiltersFromString('-foo -bar -baz qux')).toMatchObject({
-      exclude: ['foo', 'bar', 'baz'],
-      include: ['qux'],
+    expect(search.parseFiltersFromString("-foo -bar -baz qux")).toMatchObject({
+      exclude: ["foo", "bar", "baz"],
+      include: ["qux"],
     });
 
-    expect(search.parseFiltersFromString('foo bar baz -qux')).toMatchObject({
-      exclude: ['qux'],
-      include: ['foo', 'bar', 'baz'],
+    expect(search.parseFiltersFromString("foo bar baz -qux")).toMatchObject({
+      exclude: ["qux"],
+      include: ["foo", "bar", "baz"],
     });
   });
 
-  it('returns isVBR and isCBR if terms are present', () => {
-    expect(search.parseFiltersFromString('isvbr')).toMatchObject({
+  it("returns isVBR and isCBR if terms are present", () => {
+    expect(search.parseFiltersFromString("isvbr")).toMatchObject({
       isVBR: true,
     });
 
-    expect(search.parseFiltersFromString('iscbr')).toMatchObject({
+    expect(search.parseFiltersFromString("iscbr")).toMatchObject({
       isCBR: true,
     });
   });
 
-  it('returns expected filters given a bit of everything', () => {
+  it("returns expected filters given a bit of everything", () => {
     expect(
       search.parseFiltersFromString(
-        'big -mix of:everything isvbr iscbr minbr:42',
+        "big -mix of:everything isvbr iscbr minbr:42",
       ),
     ).toMatchObject({
-      exclude: ['mix'],
-      include: ['big'],
+      exclude: ["mix"],
+      include: ["big"],
       isCBR: true,
       isVBR: true,
       minBitRate: 42,

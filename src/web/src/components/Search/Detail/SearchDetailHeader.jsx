@@ -1,7 +1,7 @@
-import SearchStatusIcon from '../SearchStatusIcon';
-import React from 'react';
-import { useMediaQuery } from 'react-responsive';
-import { Button, Header, Icon, Segment } from 'semantic-ui-react';
+import SearchStatusIcon from "../SearchStatusIcon";
+import React from "react";
+import { useMediaQuery } from "react-responsive";
+import { Button, Header, Icon, Segment } from "semantic-ui-react";
 
 const RefreshButton = ({
   creating,
@@ -21,7 +21,7 @@ const RefreshButton = ({
       onClick={() => onCreate({ navigate: true, search: searchText })}
     >
       <Icon name="refresh" />
-      {(!isSmallScreen || isTinyScreen) && 'Search Again'}
+      {(!isSmallScreen || isTinyScreen) && "Search Again"}
     </Button>
   );
 
@@ -37,15 +37,15 @@ const StopOrDeleteButton = ({
 }) => (
   <Button
     disabled={working}
-    floated={isTinyScreen ? 'right' : undefined}
+    floated={isTinyScreen ? "right" : undefined}
     icon={isSmallScreen && !isTinyScreen}
     loading={removing || stopping}
     negative
     onClick={stopOrRemove}
   >
-    <Icon name={isComplete ? 'trash alternate' : 'stop circle'} />
+    <Icon name={isComplete ? "trash alternate" : "stop circle"} />
     {(!isSmallScreen || isTinyScreen) &&
-      (loaded && isComplete ? 'Delete' : 'Stop')}
+      (loaded && isComplete ? "Delete" : "Stop")}
   </Button>
 );
 
@@ -61,8 +61,8 @@ const SearchDetailHeader = ({
   search,
   stopping,
 }) => {
-  const isSmallScreen = useMediaQuery({ query: '(max-width: 899px)' });
-  const isTinyScreen = useMediaQuery({ query: '(max-width: 684px)' });
+  const isSmallScreen = useMediaQuery({ query: "(max-width: 899px)" });
+  const isTinyScreen = useMediaQuery({ query: "(max-width: 684px)" });
 
   const { isComplete, searchText, state } = search;
   const working = loading || creating || removing || stopping;
@@ -80,10 +80,7 @@ const SearchDetailHeader = ({
   // if the screen is less than 684 pixels, display the action buttons in a new segment, with full text.
   return (
     <>
-      <Segment
-        className="search-detail-header-segment"
-        raised
-      >
+      <Segment className="search-detail-header-segment" raised>
         <Header>
           <SearchStatusIcon state={state} />
           {searchText}

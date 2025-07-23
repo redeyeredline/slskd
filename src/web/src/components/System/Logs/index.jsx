@@ -1,8 +1,8 @@
-import '../System.css';
-import { createLogsHubConnection } from '../../../lib/hubFactory';
-import { LoaderSegment } from '../../Shared';
-import React, { Component } from 'react';
-import { Table } from 'semantic-ui-react';
+import "../System.css";
+import { createLogsHubConnection } from "../../../lib/hubFactory";
+import { LoaderSegment } from "../../Shared";
+import React, { Component } from "react";
+import { Table } from "semantic-ui-react";
 
 const initialState = {
   connected: false,
@@ -10,10 +10,10 @@ const initialState = {
 };
 
 const levels = {
-  Debug: 'DBG',
-  Error: 'ERR',
-  Information: 'INF',
-  Warning: 'WRN',
+  Debug: "DBG",
+  Error: "ERR",
+  Information: "INF",
+  Warning: "WRN",
 };
 
 const maxLogs = 500;
@@ -28,14 +28,14 @@ class Logs extends Component {
   componentDidMount() {
     const logsHub = createLogsHubConnection();
 
-    logsHub.on('buffer', (buffer) => {
+    logsHub.on("buffer", (buffer) => {
       this.setState({
         connected: true,
         logs: buffer.reverse().slice(0, maxLogs),
       });
     });
 
-    logsHub.on('log', (log) => {
+    logsHub.on("log", (log) => {
       this.setState((previousState) => ({
         connected: true,
         logs: [log].concat(previousState.logs).slice(0, maxLogs),
@@ -51,7 +51,7 @@ class Logs extends Component {
 
   formatTimestamp = (timestamp) => {
     const date = new Date(timestamp);
-    return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}:${date.getSeconds().toString().padStart(2, '0')}`; // eslint-disable-line max-len
+    return `${date.getHours().toString().padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}:${date.getSeconds().toString().padStart(2, "0")}`;  
   };
 
   render() {
@@ -61,10 +61,7 @@ class Logs extends Component {
       <div className="logs">
         {!connected && <LoaderSegment />}
         {connected && (
-          <Table
-            className="logs-table"
-            compact="very"
-          >
+          <Table className="logs-table" compact="very">
             <Table.Header>
               <Table.Row>
                 <Table.HeaderCell>Timestamp</Table.HeaderCell>
@@ -75,10 +72,10 @@ class Logs extends Component {
             <Table.Body className="logs-table-body">
               {logs.map((log) => (
                 <Table.Row
-                  disabled={log.level === 'Debug'}
+                  disabled={log.level === "Debug"}
                   key={log.timestamp}
-                  negative={log.level === 'Error'}
-                  warning={log.level === 'Warning'}
+                  negative={log.level === "Error"}
+                  warning={log.level === "Warning"}
                 >
                   <Table.Cell>{this.formatTimestamp(log.timestamp)}</Table.Cell>
                   <Table.Cell>{levels[log.level] || log.level}</Table.Cell>

@@ -1664,7 +1664,7 @@ namespace slskd
                     [EnvironmentVariable("SLSK_CONNECTION_TIMEOUT")]
                     [Description("connection timeout, in milliseconds")]
                     [Range(1000, int.MaxValue)]
-                    public int Connect { get; init; } = 10000;
+                    public int Connect { get; init; } = 30000; // Increased from 10000ms to 30000ms for large directories
 
                     /// <summary>
                     ///     Gets the connection inactivity timeout, in milliseconds.
@@ -1673,7 +1673,7 @@ namespace slskd
                     [EnvironmentVariable("SLSK_INACTIVITY_TIMEOUT")]
                     [Description("connection inactivity timeout, in milliseconds")]
                     [Range(1000, int.MaxValue)]
-                    public int Inactivity { get; init; } = 15000;
+                    public int Inactivity { get; init; } = 30000; // Increased from 15000ms to 30000ms for large directories
                 }
 
                 /// <summary>

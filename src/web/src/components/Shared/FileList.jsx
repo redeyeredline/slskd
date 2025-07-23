@@ -3,9 +3,9 @@ import {
   formatBytes,
   formatSeconds,
   getFileName,
-} from '../../lib/util';
-import React, { useState } from 'react';
-import { Checkbox, Header, Icon, List, Table } from 'semantic-ui-react';
+} from "../../lib/util";
+import React, { useState } from "react";
+import { Checkbox, Header, Icon, List, Table } from "semantic-ui-react";
 
 const FileList = ({
   directoryName,
@@ -20,14 +20,11 @@ const FileList = ({
 
   return (
     <div style={{ opacity: locked ? 0.5 : 1 }}>
-      <Header
-        className="filelist-header"
-        size="small"
-      >
+      <Header className="filelist-header" size="small">
         <div>
           <Icon
             link={!locked}
-            name={locked ? 'lock' : folded ? 'folder' : 'folder open'}
+            name={locked ? "lock" : folded ? "folder" : "folder open"}
             onClick={() => !locked && setFolded(!folded)}
             size="large"
           />
@@ -90,7 +87,7 @@ const FileList = ({
                         />
                       </Table.Cell>
                       <Table.Cell className="filelist-filename">
-                        {locked ? <Icon name="lock" /> : ''}
+                        {locked ? <Icon name="lock" /> : ""}
                         {getFileName(f.filename)}
                       </Table.Cell>
                       <Table.Cell className="filelist-size">

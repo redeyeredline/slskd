@@ -2,26 +2,26 @@ import {
   filterResponse,
   getResponses,
   parseFiltersFromString,
-} from '../../../lib/searches';
-import { sleep } from '../../../lib/util';
-import ErrorSegment from '../../Shared/ErrorSegment';
-import LoaderSegment from '../../Shared/LoaderSegment';
-import Switch from '../../Shared/Switch';
-import Response from '../Response';
-import SearchDetailHeader from './SearchDetailHeader';
-import React, { useEffect, useMemo, useState } from 'react';
-import { Button, Checkbox, Dropdown, Input, Segment } from 'semantic-ui-react';
+} from "../../../lib/searches";
+import { sleep } from "../../../lib/util";
+import ErrorSegment from "../../Shared/ErrorSegment";
+import LoaderSegment from "../../Shared/LoaderSegment";
+import Switch from "../../Shared/Switch";
+import Response from "../Response";
+import SearchDetailHeader from "./SearchDetailHeader";
+import React, { useEffect, useMemo, useState } from "react";
+import { Button, Checkbox, Dropdown, Input, Segment } from "semantic-ui-react";
 
 const sortDropdownOptions = [
   {
-    key: 'uploadSpeed',
-    text: 'Upload Speed (Fastest to Slowest)',
-    value: 'uploadSpeed',
+    key: "uploadSpeed",
+    text: "Upload Speed (Fastest to Slowest)",
+    value: "uploadSpeed",
   },
   {
-    key: 'queueLength',
-    text: 'Queue Depth (Least to Most)',
-    value: 'queueLength',
+    key: "queueLength",
+    text: "Queue Depth (Least to Most)",
+    value: "queueLength",
   },
 ];
 
@@ -45,11 +45,11 @@ const SearchDetail = ({
 
   // filters and sorting options
   const [hiddenResults, setHiddenResults] = useState([]);
-  const [resultSort, setResultSort] = useState('uploadSpeed');
+  const [resultSort, setResultSort] = useState("uploadSpeed");
   const [hideLocked, setHideLocked] = useState(true);
   const [hideNoFreeSlots, setHideNoFreeSlots] = useState(false);
   const [foldResults, setFoldResults] = useState(false);
-  const [resultFilters, setResultFilters] = useState('');
+  const [resultFilters, setResultFilters] = useState("");
   const [displayCount, setDisplayCount] = useState(5);
 
   // when the search transitions from !isComplete -> isComplete,
@@ -81,8 +81,8 @@ const SearchDetail = ({
   // sets, so memoize it.
   const sortedAndFilteredResults = useMemo(() => {
     const sortOptions = {
-      queueLength: { field: 'queueLength', order: 'asc' },
-      uploadSpeed: { field: 'uploadSpeed', order: 'desc' },
+      queueLength: { field: "queueLength", order: "asc" },
+      uploadSpeed: { field: "uploadSpeed", order: "desc" },
     };
 
     const { field, order } = sortOptions[resultSort];
@@ -102,7 +102,7 @@ const SearchDetail = ({
       .filter((r) => r.fileCount + r.lockedFileCount > 0)
       .filter((r) => !(hideNoFreeSlots && !r.hasFreeUploadSlot))
       .sort((a, b) => {
-        if (order === 'asc') {
+        if (order === "asc") {
           return a[field] - b[field];
         }
 
@@ -164,22 +164,19 @@ const SearchDetail = ({
         searching={
           !isComplete && (
             <LoaderSegment>
-              {state === 'InProgress'
+              {state === "InProgress"
                 ? `Found ${fileCount} files ${
                     lockedFileCount > 0
                       ? `(plus ${lockedFileCount} locked) `
-                      : ''
+                      : ""
                   }from ${responseCount} users`
-                : 'Loading results...'}
+                : "Loading results..."}
             </LoaderSegment>
           )
         }
       >
         {loaded && (
-          <Segment
-            className="search-options"
-            raised
-          >
+          <Segment className="search-options" raised>
             <Dropdown
               button
               className="search-options-sort icon"
@@ -218,13 +215,13 @@ const SearchDetail = ({
             <Input
               action={
                 Boolean(resultFilters) && {
-                  color: 'red',
-                  icon: 'x',
-                  onClick: () => setResultFilters(''),
+                  color: "red",
+                  icon: "x",
+                  onClick: () => setResultFilters(""),
                 }
               }
               className="search-filter"
-              label={{ content: 'Filter', icon: 'filter' }}
+              label={{ content: "Filter", icon: "filter" }}
               onChange={(_event, data) => setResultFilters(data.value)}
               placeholder="
                 lackluster container -bothersome iscbr|isvbr islossless|islossy 
@@ -235,15 +232,17 @@ const SearchDetail = ({
           </Segment>
         )}
         {loaded &&
-          sortedAndFilteredResults.slice(0, displayCount).map((r) => (
-            <Response
-              disabled={disabled}
-              isInitiallyFolded={foldResults}
-              key={r.username}
-              onHide={() => setHiddenResults([...hiddenResults, r.username])}
-              response={r}
-            />
-          ))}
+          sortedAndFilteredResults
+            .slice(0, displayCount)
+            .map((r) => (
+              <Response
+                disabled={disabled}
+                isInitiallyFolded={foldResults}
+                key={r.username}
+                onHide={() => setHiddenResults([...hiddenResults, r.username])}
+                response={r}
+              />
+            ))}
         {loaded &&
           (remainingCount > 0 ? (
             <Button
@@ -253,7 +252,7 @@ const SearchDetail = ({
               primary
               size="large"
             >
-              Show {remainingCount > 5 ? 5 : remainingCount} More Results{' '}
+              Show {remainingCount > 5 ? 5 : remainingCount} More Results{" "}
               {`(${remainingCount} remaining, ${filteredCount} hidden by filter(s))`}
             </Button>
           ) : filteredCount > 0 ? (
@@ -264,7 +263,7 @@ const SearchDetail = ({
               size="large"
             >{`All results shown. ${filteredCount} results hidden by filter(s)`}</Button>
           ) : (
-            ''
+            ""
           ))}
       </Switch>
     </>

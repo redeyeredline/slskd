@@ -1,4 +1,4 @@
-import api from './api';
+import api from "./api";
 
 export const getAll = async ({ direction }) => {
   const response = (
@@ -6,7 +6,7 @@ export const getAll = async ({ direction }) => {
   ).data;
 
   if (!Array.isArray(response)) {
-    console.warn('got non-array response from transfers API', response);
+    console.warn("got non-array response from transfers API", response);
     return undefined;
   }
 
@@ -48,16 +48,16 @@ export const getPlaceInQueue = ({ username, id }) => {
 };
 
 export const isStateRetryable = (state) =>
-  state.includes('Completed') && state !== 'Completed, Succeeded';
+  state.includes("Completed") && state !== "Completed, Succeeded";
 
 export const isStateCancellable = (state) =>
   [
-    'InProgress',
-    'Requested',
-    'Queued',
-    'Queued, Remotely',
-    'Queued, Locally',
-    'Initializing',
+    "InProgress",
+    "Requested",
+    "Queued",
+    "Queued, Remotely",
+    "Queued, Locally",
+    "Initializing",
   ].find((s) => s === state);
 
-export const isStateRemovable = (state) => state.includes('Completed');
+export const isStateRemovable = (state) => state.includes("Completed");

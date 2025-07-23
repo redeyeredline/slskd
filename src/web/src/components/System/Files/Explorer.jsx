@@ -1,8 +1,8 @@
-import { deleteDirectory, deleteFile, list } from '../../../lib/files';
-import { formatBytes, formatDate } from '../../../lib/util';
-import { LoaderSegment } from '../../Shared';
-import React, { useEffect, useState } from 'react';
-import { Header, Icon, Modal, Table } from 'semantic-ui-react';
+import { deleteDirectory, deleteFile, list } from "../../../lib/files";
+import { formatBytes, formatDate } from "../../../lib/util";
+import { LoaderSegment } from "../../Shared";
+import React, { useEffect, useState } from "react";
+import { Header, Icon, Modal, Table } from "semantic-ui-react";
 
 const FileRow = ({
   fullName,
@@ -18,20 +18,20 @@ const FileRow = ({
       <Icon name="file outline" />
       {name}
     </Table.Cell>
-    <Table.Cell>{modifiedAt ? formatDate(modifiedAt) : ''}</Table.Cell>
-    <Table.Cell>{length ? formatBytes(length) : ''}</Table.Cell>
+    <Table.Cell>{modifiedAt ? formatDate(modifiedAt) : ""}</Table.Cell>
+    <Table.Cell>{length ? formatBytes(length) : ""}</Table.Cell>
     <Table.Cell>
       {remoteFileManagement ? (
         <Modal
           actions={[
-            'Cancel',
+            "Cancel",
             {
-              content: 'Delete',
-              key: 'done',
+              content: "Delete",
+              key: "done",
               negative: true,
               onClick: async () => {
                 await deleteFile({
-                  path: `${subdirectory.join('/')}/${fullName}`,
+                  path: `${subdirectory.join("/")}/${fullName}`,
                   root,
                 });
                 fetch();
@@ -41,17 +41,14 @@ const FileRow = ({
           centered
           content={`Are you sure you want to delete file '${fullName}'?`}
           header={
-            <Header
-              content="Confirm File Delete"
-              icon="trash alternate"
-            />
+            <Header content="Confirm File Delete" icon="trash alternate" />
           }
           size="small"
           trigger={
             <Icon
               color="red"
               name="trash alternate"
-              style={{ cursor: 'pointer' }}
+              style={{ cursor: "pointer" }}
             />
           }
         />
@@ -71,27 +68,24 @@ const DirectoryRow = ({
   subdirectory,
 }) => (
   <Table.Row key={name}>
-    <Table.Cell
-      onClick={onClick}
-      style={{ cursor: 'pointer' }}
-    >
+    <Table.Cell onClick={onClick} style={{ cursor: "pointer" }}>
       <Icon name="folder" />
       {name}
     </Table.Cell>
-    <Table.Cell>{modifiedAt ? formatDate(modifiedAt) : ''}</Table.Cell>
+    <Table.Cell>{modifiedAt ? formatDate(modifiedAt) : ""}</Table.Cell>
     <Table.Cell />
     <Table.Cell>
       {remoteFileManagement && deletable ? (
         <Modal
           actions={[
-            'Cancel',
+            "Cancel",
             {
-              content: 'Delete',
-              key: 'done',
+              content: "Delete",
+              key: "done",
               negative: true,
               onClick: async () => {
                 await deleteDirectory({
-                  path: `${subdirectory.join('/')}/${fullName}`,
+                  path: `${subdirectory.join("/")}/${fullName}`,
                   root,
                 });
                 fetch();
@@ -101,22 +95,19 @@ const DirectoryRow = ({
           centered
           content={`Are you sure you want to delete directory '${fullName}'?`}
           header={
-            <Header
-              content="Confirm Directory Delete"
-              icon="trash alternate"
-            />
+            <Header content="Confirm Directory Delete" icon="trash alternate" />
           }
           size="small"
           trigger={
             <Icon
               color="red"
               name="trash alternate"
-              style={{ cursor: 'pointer' }}
+              style={{ cursor: "pointer" }}
             />
           }
         />
       ) : (
-        ''
+        ""
       )}
     </Table.Cell>
   </Table.Row>
@@ -131,7 +122,7 @@ const Explorer = ({ remoteFileManagement, root }) => {
     setLoading(true);
     const directoryResult = await list({
       root,
-      subdirectory: subdirectory.join('/'),
+      subdirectory: subdirectory.join("/"),
     });
     setDirectory(directoryResult);
     setLoading(false);
@@ -163,17 +154,11 @@ const Explorer = ({ remoteFileManagement, root }) => {
 
   return (
     <>
-      <Header
-        className="explorer-working-directory"
-        size="small"
-      >
+      <Header className="explorer-working-directory" size="small">
         <Icon name="folder open" />
-        {'/' + root + '/' + subdirectory.join('/')}
+        {"/" + root + "/" + subdirectory.join("/")}
       </Header>
-      <Table
-        className="unstackable"
-        size="large"
-      >
+      <Table className="unstackable" size="large">
         <Table.Header>
           <Table.Row>
             <Table.HeaderCell className="explorer-list-name">
@@ -195,8 +180,8 @@ const Explorer = ({ remoteFileManagement, root }) => {
                 colSpan={99}
                 style={{
                   opacity: 0.5,
-                  padding: '10px !important',
-                  textAlign: 'center',
+                  padding: "10px !important",
+                  textAlign: "center",
                 }}
               >
                 No files or directories

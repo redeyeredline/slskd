@@ -3,19 +3,19 @@ import {
   getYamlLocation,
   updateYaml,
   validateYaml,
-} from '../../../lib/options';
-import { Div, PlaceholderSegment, Switch } from '../../Shared';
-import CodeEditor from '../../Shared/CodeEditor';
-import React, { useEffect, useState } from 'react';
-import { Button, Icon, Message, Modal } from 'semantic-ui-react';
+} from "../../../lib/options";
+import { Div, PlaceholderSegment, Switch } from "../../Shared";
+import CodeEditor from "../../Shared/CodeEditor";
+import React, { useEffect, useState } from "react";
+import { Button, Icon, Message, Modal } from "semantic-ui-react";
 
 const EditModal = ({ onClose, open, theme }) => {
-  // eslint-disable-next-line react/hook-use-state
+   
   const [{ error, loading }, setLoading] = useState({
     error: false,
     loading: true,
   });
-  // eslint-disable-next-line react/hook-use-state
+   
   const [{ isDirty, location, yaml }, setYaml] = useState({
     isDirty: false,
     location: undefined,
@@ -70,28 +70,18 @@ const EditModal = ({ onClose, open, theme }) => {
   }, [open]);
 
   return (
-    <Modal
-      onClose={onClose}
-      open={open}
-      size="large"
-    >
+    <Modal onClose={onClose} open={open} size="large">
       <Modal.Header>
         <Icon name="edit" />
         Edit Options
         <Div hidden={loading}>
-          <Message
-            className="no-grow edit-code-header"
-            warning
-          >
+          <Message className="no-grow edit-code-header" warning>
             <Icon name="warning sign" />
             Editing {location}
           </Message>
         </Div>
       </Modal.Header>
-      <Modal.Content
-        className="edit-code-content"
-        scrolling
-      >
+      <Modal.Content className="edit-code-content" scrolling>
         <Switch
           error={error && <PlaceholderSegment icon="close" />}
           loading={loading && <PlaceholderSegment loading />}
@@ -100,8 +90,8 @@ const EditModal = ({ onClose, open, theme }) => {
             {...{
               className:
                 yamlError || updateError
-                  ? 'edit-code-container-error'
-                  : 'edit-code-container',
+                  ? "edit-code-container-error"
+                  : "edit-code-container",
             }}
           >
             <CodeEditor
@@ -115,26 +105,16 @@ const EditModal = ({ onClose, open, theme }) => {
       </Modal.Content>
       <Modal.Actions>
         {(yamlError || updateError) && (
-          <Message
-            className="no-grow left-align"
-            negative
-          >
+          <Message className="no-grow left-align" negative>
             <Icon name="x" />
-            {(yamlError ?? '') + (updateError ?? '')}
+            {(yamlError ?? "") + (updateError ?? "")}
           </Message>
         )}
-        <Button
-          disabled={!isDirty}
-          onClick={() => save(yaml)}
-          primary
-        >
+        <Button disabled={!isDirty} onClick={() => save(yaml)} primary>
           <Icon name="save" />
           Save
         </Button>
-        <Button
-          negative
-          onClick={onClose}
-        >
+        <Button negative onClick={onClose}>
           <Icon name="close" />
           Cancel
         </Button>

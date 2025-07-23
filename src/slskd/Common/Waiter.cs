@@ -120,7 +120,7 @@ namespace slskd
     /// </summary>
     public sealed class Waiter : IWaiter
     {
-        private const int DefaultTimeoutValue = 5000;
+        private const int DefaultTimeoutValue = 30000; // Increased from 15000ms to 30000ms for very large directories
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="Waiter"/> class with the default timeout.

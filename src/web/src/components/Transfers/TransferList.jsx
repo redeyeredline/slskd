@@ -1,5 +1,5 @@
-import { formatBytes, formatBytesAsUnit, getFileName } from '../../lib/util';
-import React, { Component } from 'react';
+import { formatBytes, formatBytesAsUnit, getFileName } from "../../lib/util";
+import React, { Component } from "react";
 import {
   Button,
   Checkbox,
@@ -8,31 +8,31 @@ import {
   List,
   Progress,
   Table,
-} from 'semantic-ui-react';
+} from "semantic-ui-react";
 
 const getColor = (state) => {
   switch (state) {
-    case 'InProgress':
-      return { color: 'blue' };
-    case 'Completed, Succeeded':
-      return { color: 'green' };
-    case 'Requested':
-    case 'Queued, Locally':
-    case 'Queued, Remotely':
-    case 'Queued':
+    case "InProgress":
+      return { color: "blue" };
+    case "Completed, Succeeded":
+      return { color: "green" };
+    case "Requested":
+    case "Queued, Locally":
+    case "Queued, Remotely":
+    case "Queued":
       return {};
-    case 'Initializing':
-      return { color: 'teal' };
+    case "Initializing":
+      return { color: "teal" };
     default:
-      return { color: 'red' };
+      return { color: "red" };
   }
 };
 
-const isRetryableState = (state) => getColor(state).color === 'red';
-const isQueuedState = (state) => state.includes('Queued');
+const isRetryableState = (state) => getColor(state).color === "red";
+const isQueuedState = (state) => state.includes("Queued");
 
 const formatBytesTransferred = ({ size, transferred }) => {
-  const [s, sExtension] = formatBytes(size, 1).split(' ');
+  const [s, sExtension] = formatBytes(size, 1).split(" ");
   const t = formatBytesAsUnit(transferred, sExtension, 1);
 
   return `${t}/${s} ${sExtension}`;
@@ -50,7 +50,7 @@ class TransferList extends Component {
   handleClick = (file) => {
     const { direction, state } = file;
 
-    if (direction === 'Download') {
+    if (direction === "Download") {
       if (isRetryableState(state)) {
         return this.props.onRetryRequested(file);
       }
@@ -73,13 +73,10 @@ class TransferList extends Component {
 
     return (
       <div>
-        <Header
-          className="filelist-header"
-          size="small"
-        >
+        <Header className="filelist-header" size="small">
           <Icon
             link
-            name={isFolded ? 'folder' : 'folder open'}
+            name={isFolded ? "folder" : "folder open"}
             onClick={() => this.toggleFolded()}
           />
           {directoryName}
@@ -141,7 +138,7 @@ class TransferList extends Component {
                           {getFileName(f.filename)}
                         </Table.Cell>
                         <Table.Cell className="transferlist-progress">
-                          {f.state === 'InProgress' ? (
+                          {f.state === "InProgress" ? (
                             <Progress
                               color={getColor(f.state).color}
                               percent={Math.round(f.percentComplete)}
@@ -153,29 +150,31 @@ class TransferList extends Component {
                               fluid
                               size="mini"
                               style={{
-                                cursor: f.direction === 'Upload' ? 'unset' : '',
+                                cursor: f.direction === "Upload" ? "unset" : "",
                                 margin: 0,
                                 padding: 7,
                               }}
                               {...getColor(f.state)}
-                              active={f.direction === 'Upload'}
+                              active={f.direction === "Upload"}
                               onClick={() => this.handleClick(f)}
                             >
-                              {f.direction === 'Download' &&
+                              {f.direction === "Download" &&
                                 isQueuedState(f.state) && (
                                   <Icon name="refresh" />
                                 )}
-                              {f.direction === 'Download' &&
+                              {f.direction === "Download" &&
                                 isRetryableState(f.state) && (
                                   <Icon name="redo" />
                                 )}
                               {f.state}
-                              {f.placeInQueue ? ` (#${f.placeInQueue})` : ''}
+                              {f.placeInQueue ? ` (#${f.placeInQueue})` : ""}
                             </Button>
                           )}
                         </Table.Cell>
                         <Table.Cell className="transferlist-queue-position">
-                          {isQueuedState(f.state) ? f.placeInQueue ?? '—' : '—'}
+                          {isQueuedState(f.state)
+                            ? (f.placeInQueue ?? "—")
+                            : "—"}
                         </Table.Cell>
                         <Table.Cell className="transferlist-size">
                           {formatBytesTransferred({
@@ -190,7 +189,7 @@ class TransferList extends Component {
             </List.Item>
           </List>
         ) : (
-          ''
+          ""
         )}
       </div>
     );

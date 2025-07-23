@@ -1,6 +1,6 @@
-import { Switch } from '../../Shared';
-import React from 'react';
-import { Icon, Table } from 'semantic-ui-react';
+import { Switch } from "../../Shared";
+import React from "react";
+import { Icon, Table } from "semantic-ui-react";
 
 const ExclusionTable = ({ exclusions = [] } = {}) => {
   return (
@@ -18,8 +18,8 @@ const ExclusionTable = ({ exclusions = [] } = {}) => {
                 <Table.Cell
                   style={{
                     opacity: 0.5,
-                    padding: '10px !important',
-                    textAlign: 'center',
+                    padding: "10px !important",
+                    textAlign: "center",
                   }}
                 >
                   No exclusions configured
@@ -31,10 +31,7 @@ const ExclusionTable = ({ exclusions = [] } = {}) => {
           {exclusions.map((share) => (
             <Table.Row key={share.localPath}>
               <Table.Cell>
-                <Icon
-                  color="red"
-                  name="x"
-                />
+                <Icon color="red" name="x" />
                 {share.localPath}
               </Table.Cell>
             </Table.Row>

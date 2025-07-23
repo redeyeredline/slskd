@@ -1,20 +1,15 @@
-import './Rooms.css';
-import React, { useMemo } from 'react';
-import { Flag, Icon, List, Popup } from 'semantic-ui-react';
+import "./Rooms.css";
+import React, { useMemo } from "react";
+import { Flag, Icon, List, Popup } from "semantic-ui-react";
 
 const getDetails = (user) => {
-  return user.countryCode ?? '?';
+  return user.countryCode ?? "?";
 };
 
 const RoomUserList = ({ users }) => {
   const getFlag = (user) => {
     if (!(user || {}).countryCode)
-      return (
-        <Icon
-          className="unknown-user-flag"
-          name="question"
-        />
-      );
+      return <Icon className="unknown-user-flag" name="question" />;
 
     return <Flag name={user.countryCode.toLowerCase()} />;
   };
@@ -24,7 +19,7 @@ const RoomUserList = ({ users }) => {
       .sort((a, b) => a.username.localeCompare(b.username))
       .reduce(
         (accumulator, user) => {
-          (user.status === 'Online'
+          (user.status === "Online"
             ? accumulator.online
             : accumulator.offline
           ).push(user);
@@ -40,14 +35,11 @@ const RoomUserList = ({ users }) => {
     <List>
       {sortedUsers.map((user) => (
         <List.Item
-          className={user.self ? 'room-user-self' : ''}
+          className={user.self ? "room-user-self" : ""}
           key={user.username}
         >
-          <List.Content style={{ opacity: user.status === 'Online' ? 1 : 0.5 }}>
-            <Popup
-              content={getDetails(user)}
-              trigger={getFlag(user)}
-            />
+          <List.Content style={{ opacity: user.status === "Online" ? 1 : 0.5 }}>
+            <Popup content={getDetails(user)} trigger={getFlag(user)} />
             {user.username}
           </List.Content>
         </List.Item>

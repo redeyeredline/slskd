@@ -1,8 +1,8 @@
-import ErrorSegment from '../../Shared/ErrorSegment';
-import Switch from '../../Shared/Switch';
-import SearchListRow from './SearchListRow';
-import React from 'react';
-import { Card, Icon, Loader, Table } from 'semantic-ui-react';
+import ErrorSegment from "../../Shared/ErrorSegment";
+import Switch from "../../Shared/Switch";
+import SearchListRow from "./SearchListRow";
+import React from "react";
+import { Card, Icon, Loader, Table } from "semantic-ui-react";
 
 const SearchList = ({
   connecting = false,
@@ -12,28 +12,16 @@ const SearchList = ({
   searches = {},
 }) => {
   return (
-    <Card
-      className="search-list-card"
-      raised
-    >
+    <Card className="search-list-card" raised>
       <Card.Content>
         <div className="search-list-wrapper">
           <Switch
             connecting={
-              connecting && (
-                <Loader
-                  active
-                  inline="centered"
-                  size="small"
-                />
-              )
+              connecting && <Loader active inline="centered" size="small" />
             }
             error={error && <ErrorSegment caption={error} />}
           >
-            <Table
-              className="unstackable"
-              size="large"
-            >
+            <Table className="unstackable" size="large">
               <Table.Header>
                 <Table.Row>
                   <Table.HeaderCell className="search-list-action">

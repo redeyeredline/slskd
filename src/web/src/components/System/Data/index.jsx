@@ -1,7 +1,7 @@
-import { clearCompleted } from '../../../lib/transfers';
-import React, { useState } from 'react';
-import { toast } from 'react-toastify';
-import { Button, Divider, Header, Icon } from 'semantic-ui-react';
+import { clearCompleted } from "../../../lib/transfers";
+import React, { useState } from "react";
+import { toast } from "react-toastify";
+import { Button, Divider, Header, Icon } from "semantic-ui-react";
 
 const clear = async ({ direction, setState }) => {
   setState(true);
@@ -16,23 +16,20 @@ const Data = () => {
 
   return (
     <div>
-      <Header
-        as="h3"
-        className="transfer-header"
-      >
+      <Header as="h3" className="transfer-header">
         Transfer Data
       </Header>
       <Divider />
       <p>
         <span>
           The Uploads and Downloads pages can become unresponsive if too many
-          transfers are displayed. If you're having trouble with either page,
+          transfers are displayed. If you&apos;re having trouble with either page,
           try using the buttons below to remove completed transfers.
         </span>
       </p>
       <Button
         loading={up}
-        onClick={() => clear({ direction: 'upload', setState: setUp })}
+        onClick={() => clear({ direction: "upload", setState: setUp })}
         primary
       >
         <Icon name="trash alternate" />
@@ -40,7 +37,7 @@ const Data = () => {
       </Button>
       <Button
         loading={down}
-        onClick={() => clear({ direction: 'download', setState: setDown })}
+        onClick={() => clear({ direction: "download", setState: setDown })}
         primary
       >
         <Icon name="trash alternate" />

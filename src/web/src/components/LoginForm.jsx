@@ -1,5 +1,5 @@
-import Logos from './Shared/Logo';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import Logos from "./Shared/Logo";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   Button,
   Checkbox,
@@ -10,12 +10,12 @@ import {
   Input,
   Message,
   Segment,
-} from 'semantic-ui-react';
+} from "semantic-ui-react";
 
 const initialState = {
-  password: '',
+  password: "",
   rememberMe: true,
-  username: '',
+  username: "",
 };
 
 const LoginForm = ({ error, loading, onLoginAttempt }) => {
@@ -28,7 +28,7 @@ const LoginForm = ({ error, loading, onLoginAttempt }) => {
   );
 
   useEffect(() => {
-    if (state.username !== '' && state.password !== '') {
+    if (state.username !== "" && state.password !== "") {
       setReady(true);
     } else {
       setReady(false);
@@ -49,20 +49,16 @@ const LoginForm = ({ error, loading, onLoginAttempt }) => {
   const { password, rememberMe, username } = state;
 
   return (
-    <Grid
-      style={{ height: '100vh' }}
-      textAlign="center"
-      verticalAlign="middle"
-    >
+    <Grid style={{ height: "100vh" }} textAlign="center" verticalAlign="middle">
       <Grid.Column style={{ maxWidth: 372 }}>
         <Header
           as="h2"
           style={{
-            fontFamily: 'monospace',
-            fontSize: 'inherit',
+            fontFamily: "monospace",
+            fontSize: "inherit",
             letterSpacing: -1,
             lineHeight: 1.1,
-            whiteSpace: 'pre',
+            whiteSpace: "pre",
           }}
           textAlign="center"
         >
@@ -75,7 +71,7 @@ const LoginForm = ({ error, loading, onLoginAttempt }) => {
               fluid
               icon="user"
               iconPosition="left"
-              onChange={(event) => handleChange('username', event.target.value)}
+              onChange={(event) => handleChange("username", event.target.value)}
               placeholder="Username"
               ref={usernameInput}
             />
@@ -84,7 +80,7 @@ const LoginForm = ({ error, loading, onLoginAttempt }) => {
               fluid
               icon="lock"
               iconPosition="left"
-              onChange={(event) => handleChange('password', event.target.value)}
+              onChange={(event) => handleChange("password", event.target.value)}
               placeholder="Password"
               type="password"
             />
@@ -92,7 +88,7 @@ const LoginForm = ({ error, loading, onLoginAttempt }) => {
               checked={rememberMe}
               disabled={loading}
               label="Remember Me"
-              onChange={() => handleChange('rememberMe', !rememberMe)}
+              onChange={() => handleChange("rememberMe", !rememberMe)}
             />
           </Segment>
           <Button
@@ -108,11 +104,7 @@ const LoginForm = ({ error, loading, onLoginAttempt }) => {
             Login
           </Button>
           {error && (
-            <Message
-              className="login-failure"
-              floating
-              negative
-            >
+            <Message className="login-failure" floating negative>
               <Icon name="x" />
               {error.message}
             </Message>

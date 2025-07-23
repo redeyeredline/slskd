@@ -1,7 +1,7 @@
-import api from './api';
+import api from "./api";
 
 export const getAll = async () => {
-  return (await api.get('/conversations')).data;
+  return (await api.get("/conversations")).data;
 };
 
 export const get = async ({ username }) => {

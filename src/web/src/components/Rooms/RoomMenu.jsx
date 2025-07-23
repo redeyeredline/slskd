@@ -1,30 +1,23 @@
-import './Rooms.css';
-import RoomJoinModal from './RoomJoinModal';
-import React from 'react';
-import { Button, Icon, Menu } from 'semantic-ui-react';
+import "./Rooms.css";
+import RoomJoinModal from "./RoomJoinModal";
+import React from "react";
+import { Button, Icon, Menu } from "semantic-ui-react";
 
 const RoomMenu = ({ active, joined, onRoomChange, ...rest }) => {
   const names = [...joined];
   const isActive = (name) => active === name;
 
   return (
-    <Menu
-      className="room-menu"
-      size="large"
-    >
+    <Menu className="room-menu" size="large">
       {names.map((name) => (
         <Menu.Item
           active={isActive(name)}
-          className={`menu-item ${isActive(name) ? 'menu-active' : ''}`}
+          className={`menu-item ${isActive(name) ? "menu-active" : ""}`}
           key={name}
           name={name}
           onClick={() => onRoomChange(name)}
         >
-          <Icon
-            color="green"
-            name="circle"
-            size="tiny"
-          />
+          <Icon color="green" name="circle" size="tiny" />
           {name}
         </Menu.Item>
       ))}
@@ -33,10 +26,7 @@ const RoomMenu = ({ active, joined, onRoomChange, ...rest }) => {
           centered
           size="small"
           trigger={
-            <Button
-              className="add-button"
-              icon
-            >
+            <Button className="add-button" icon>
               <Icon name="plus" />
             </Button>
           }

@@ -1,11 +1,11 @@
-import './EnhancedBrowse.css';
-import * as users from '../../lib/users';
-import PlaceholderSegment from '../Shared/PlaceholderSegment';
-import Directory from './Directory';
-import VirtualDirectoryTree from './VirtualDirectoryTree';
-import * as lzString from 'lz-string';
-import React, { Component } from 'react';
-import { withRouter } from 'react-router-dom';
+import "./EnhancedBrowse.css";
+import * as users from "../../lib/users";
+import PlaceholderSegment from "../Shared/PlaceholderSegment";
+import Directory from "./Directory";
+import VirtualDirectoryTree from "./VirtualDirectoryTree";
+import * as lzString from "lz-string";
+import React, { Component } from "react";
+import { withRouter } from "react-router-dom";
 import {
   Card,
   Icon,
@@ -13,11 +13,11 @@ import {
   Loader,
   Pagination,
   Segment,
-} from 'semantic-ui-react';
+} from "semantic-ui-react";
 
 const initialState = {
   browseError: undefined,
-  browseState: 'idle',
+  browseState: "idle",
   browseStatus: 0,
   currentPage: 1,
   hasNextPage: false,
@@ -30,15 +30,15 @@ const initialState = {
   },
   interval: undefined,
   pageSize: 100,
-  searchTerm: '',
+  searchTerm: "",
   searchTimeout: null,
   selectedDirectory: {},
   selectedFiles: [],
-  separator: '\\',
+  separator: "\\",
   totalCount: 0,
   totalPages: 0,
   tree: [],
-  username: '',
+  username: "",
   useVirtualization: true,
 };
 
@@ -62,25 +62,25 @@ class EnhancedBrowse extends Component {
       this.setState({ username: this.props.location.state.user }, this.browse);
     }
 
-    document.addEventListener('keyup', this.keyUp, false);
+    document.addEventListener("keyup", this.keyUp, false);
   }
 
   componentWillUnmount() {
     clearInterval(this.state.interval);
     this.setState({ interval: undefined });
-    document.removeEventListener('keyup', this.keyUp, false);
+    document.removeEventListener("keyup", this.keyUp, false);
   }
 
   browse = async (usePagination = true) => {
     const { currentPage, pageSize, searchTerm, username } = this.state;
 
     // Don't browse if username is empty
-    if (!username || username.trim() === '') {
+    if (!username || username.trim() === "") {
       return;
     }
 
     this.setState(
-      { browseError: undefined, browseState: 'pending', username },
+      { browseError: undefined, browseState: "pending", username },
       async () => {
         try {
           let response;
@@ -116,7 +116,7 @@ class EnhancedBrowse extends Component {
               pageSize: respPageSize,
               totalCount,
               totalPages,
-              tree: this.getDirectoryTree({ directories, separator: '\\' }),
+              tree: this.getDirectoryTree({ directories, separator: "\\" }),
             });
           } else {
             // Fallback to original API for small datasets
@@ -147,19 +147,19 @@ class EnhancedBrowse extends Component {
                 lockedDirectories: lockedDirectoryCount,
                 lockedFiles: lockedFileCount,
               },
-              separator: '\\',
-              tree: this.getDirectoryTree({ directories, separator: '\\' }),
+              separator: "\\",
+              tree: this.getDirectoryTree({ directories, separator: "\\" }),
             });
           }
 
           this.setState(
-            { browseError: undefined, browseState: 'complete' },
+            { browseError: undefined, browseState: "complete" },
             () => {
               this.saveState();
             },
           );
         } catch (error) {
-          this.setState({ browseError: error, browseState: 'error' });
+          this.setState({ browseError: error, browseState: "error" });
         }
       },
     );
@@ -179,7 +179,7 @@ class EnhancedBrowse extends Component {
     this.setState({ searchTerm: value });
 
     // Only search if we have a username
-    if (username && username.trim() !== '') {
+    if (username && username.trim() !== "") {
       // Debounce search to avoid too many API calls
       const timeout = setTimeout(() => {
         this.setState({ currentPage: 1 }, () => {
@@ -193,7 +193,7 @@ class EnhancedBrowse extends Component {
 
   handlePageChange = (event, { activePage }) => {
     const { username } = this.state;
-    if (username && username.trim() !== '') {
+    if (username && username.trim() !== "") {
       this.setState({ currentPage: activePage }, () => {
         this.browse(true);
       });
@@ -207,16 +207,16 @@ class EnhancedBrowse extends Component {
     });
   };
 
-  keyUp = (event) => (event.key === 'Escape' ? this.clear() : '');
+  keyUp = (event) => (event.key === "Escape" ? this.clear() : "");
 
   saveState = () => {
     this.inputtext.inputRef.current.disabled =
-      this.state.browseState !== 'idle';
+      this.state.browseState !== "idle";
 
     const storeToLocalStorage = () => {
       try {
         localStorage.setItem(
-          'soulseek-enhanced-browse-state',
+          "soulseek-enhanced-browse-state",
           lzString.compress(JSON.stringify(this.state)),
         );
       } catch (error) {
@@ -233,7 +233,7 @@ class EnhancedBrowse extends Component {
 
   loadState = () => {
     try {
-      const savedState = localStorage.getItem('soulseek-enhanced-browse-state');
+      const savedState = localStorage.getItem("soulseek-enhanced-browse-state");
       if (savedState && !this.props.location.state?.user) {
         const decompressed = lzString.decompress(savedState);
         if (decompressed) {
@@ -243,7 +243,7 @@ class EnhancedBrowse extends Component {
         }
       }
     } catch (error) {
-      console.error('Error loading state from localStorage:', error);
+      console.error("Error loading state from localStorage:", error);
     }
 
     // Fallback to initialState
@@ -252,14 +252,14 @@ class EnhancedBrowse extends Component {
 
   fetchStatus = async () => {
     const { browseState, username } = this.state;
-    if (browseState === 'pending' && username && username.trim() !== '') {
+    if (browseState === "pending" && username && username.trim() !== "") {
       try {
         const response = await users.getBrowseStatus({ username });
         this.setState({
           browseStatus: response.data,
         });
       } catch (error) {
-        console.error('Error fetching browse status:', error);
+        console.error("Error fetching browse status:", error);
       }
     }
   };
@@ -329,7 +329,7 @@ class EnhancedBrowse extends Component {
             () => this.saveState(),
           );
         } catch (error) {
-          console.error('Error fetching directory contents:', error);
+          console.error("Error fetching directory contents:", error);
           // Still save the state even if directory contents fail to load
           this.saveState();
         }
@@ -359,7 +359,7 @@ class EnhancedBrowse extends Component {
       username,
     } = this.state;
     const { locked, name } = selectedDirectory;
-    const pending = browseState === 'pending';
+    const pending = browseState === "pending";
 
     const emptyTree = !(tree && tree.length > 0);
 
@@ -370,29 +370,23 @@ class EnhancedBrowse extends Component {
 
     return (
       <div className="search-container">
-        <Segment
-          className="browse-segment"
-          raised
-        >
+        <Segment className="browse-segment" raised>
           <div className="browse-segment-icon">
-            <Icon
-              name="folder open"
-              size="big"
-            />
+            <Icon name="folder open" size="big" />
           </div>
           <Input
             action={
               !pending &&
-              (browseState === 'idle'
-                ? { icon: 'search', onClick: () => this.browse(true) }
-                : { color: 'red', icon: 'x', onClick: this.clear })
+              (browseState === "idle"
+                ? { icon: "search", onClick: () => this.browse(true) }
+                : { color: "red", icon: "x", onClick: this.clear })
             }
             className="search-input"
             disabled={pending}
             loading={pending}
             onChange={this.handleUsernameChange}
             onKeyUp={(event) =>
-              event.key === 'Enter' ? this.browse(true) : ''
+              event.key === "Enter" ? this.browse(true) : ""
             }
             placeholder="Username"
             ref={(input) => (this.inputtext = input)}
@@ -402,12 +396,7 @@ class EnhancedBrowse extends Component {
         </Segment>
 
         {pending ? (
-          <Loader
-            active
-            className="search-loader"
-            inline="centered"
-            size="big"
-          >
+          <Loader active className="search-loader" inline="centered" size="big">
             Downloaded {Math.round(browseStatus.percentComplete || 0)}% of
             Response
           </Loader>
@@ -423,16 +412,10 @@ class EnhancedBrowse extends Component {
                     icon="folder open"
                   />
                 ) : (
-                  <Card
-                    className="browse-tree-card"
-                    raised
-                  >
+                  <Card className="browse-tree-card" raised>
                     <Card.Content>
                       <Card.Header>
-                        <Icon
-                          color="green"
-                          name="circle"
-                        />
+                        <Icon color="green" name="circle" />
                         {username}
                       </Card.Header>
                       <Card.Meta className="browse-meta">
@@ -471,7 +454,7 @@ class EnhancedBrowse extends Component {
                             totalPages={totalPages}
                           />
                           <div className="pagination-info">
-                            Page {currentPage} of {totalPages} ({totalCount}{' '}
+                            Page {currentPage} of {totalPages} ({totalCount}{" "}
                             total)
                           </div>
                         </div>

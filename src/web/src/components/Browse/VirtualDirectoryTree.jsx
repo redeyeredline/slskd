@@ -1,7 +1,7 @@
-import './VirtualDirectoryTree.css';
-import React, { useMemo, useState } from 'react';
-import { FixedSizeList as List } from 'react-window';
-import { List as SemanticList } from 'semantic-ui-react';
+import "./VirtualDirectoryTree.css";
+import React, { useMemo, useState } from "react";
+import { FixedSizeList as List } from "react-window";
+import { List as SemanticList } from "semantic-ui-react";
 
 const VirtualDirectoryTree = ({ onSelect, selectedDirectoryName, tree }) => {
   const [expandedItems, setExpandedItems] = useState(new Set());
@@ -40,7 +40,7 @@ const VirtualDirectoryTree = ({ onSelect, selectedDirectoryName, tree }) => {
     });
   };
 
-  // eslint-disable-next-line react/no-unstable-nested-components
+   
   const Row = ({ index, style }) => {
     const item = flattenedItems[index];
     const isExpanded = expandedItems.has(item.name);
@@ -50,33 +50,33 @@ const VirtualDirectoryTree = ({ onSelect, selectedDirectoryName, tree }) => {
     return (
       <div style={style}>
         <SemanticList.Item
-          className={`virtual-tree-item level-${item.level} ${isSelected ? 'selected' : ''} ${item.locked ? 'locked' : ''}`}
+          className={`virtual-tree-item level-${item.level} ${isSelected ? "selected" : ""} ${item.locked ? "locked" : ""}`}
           style={{ paddingLeft: `${item.level * 20 + 10}px` }}
         >
           <SemanticList.Icon
-            className={`virtual-tree-icon ${isSelected ? 'selected' : ''} ${item.locked ? 'locked' : ''}`}
+            className={`virtual-tree-icon ${isSelected ? "selected" : ""} ${item.locked ? "locked" : ""}`}
             name={
               item.locked === true
-                ? 'lock'
+                ? "lock"
                 : hasChildren
                   ? isExpanded
-                    ? 'folder open'
-                    : 'folder'
-                  : 'file'
+                    ? "folder open"
+                    : "folder"
+                  : "file"
             }
             onClick={() =>
               hasChildren && !item.locked && toggleExpanded(item.name)
             }
             style={{
-              cursor: hasChildren && !item.locked ? 'pointer' : 'default',
+              cursor: hasChildren && !item.locked ? "pointer" : "default",
             }}
           />
           <SemanticList.Content>
             <SemanticList.Header
-              className={`virtual-tree-header ${isSelected ? 'selected' : ''} ${item.locked ? 'locked' : ''}`}
+              className={`virtual-tree-header ${isSelected ? "selected" : ""} ${item.locked ? "locked" : ""}`}
               onClick={() => onSelect(null, item)}
             >
-              {item.name.split('\\').pop().split('/').pop()}
+              {item.name.split("\\").pop().split("/").pop()}
             </SemanticList.Header>
           </SemanticList.Content>
         </SemanticList.Item>

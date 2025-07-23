@@ -1,6 +1,6 @@
 import * as transfers from '../../lib/transfers';
 import * as users from '../../lib/users';
-import { formatBytes } from '../../lib/util';
+import { formatBytes, sleep } from '../../lib/util';
 import VirtualFileList from '../Shared/VirtualFileList';
 import React, { Component } from 'react';
 import { toast } from 'react-toastify';
@@ -77,159 +77,123 @@ class Directory extends Component {
     });
   };
 
+  // Helper: Recursively fetch all files in a directory and its subdirectories
+  fetchAllFilesRecursive = async (directory, username, separator) => {
+    console.log('[fetchAllFilesRecursive] Fetching:', directory);
+    let allFiles = [];
+    let retries = 0;
+    let response = null;
+    const maxRetries = 3;
+    while (retries < maxRetries) {
+      try {
+        console.log('[fetchAllFilesRecursive] Request payload:', {
+          directory,
+          username,
+        });
+        response = await users.getDirectoryContents({
+          directory,
+          username,
+        });
+        console.log(
+          '[fetchAllFilesRecursive] Backend response for',
+          directory,
+          ':',
+          response,
+        );
+        break;
+      } catch (error) {
+        retries++;
+        if (retries >= maxRetries) throw error;
+        await sleep(2 ** retries * 500); // Use util.js sleep function
+      }
+    }
+
+    // Patch: handle backend response as array of objects
+    let directoryResponse = response;
+    if (Array.isArray(response) && response.length > 0) {
+      directoryResponse = response[0];
+    }
+
+    if (
+      directoryResponse &&
+      directoryResponse.files &&
+      Array.isArray(directoryResponse.files)
+    ) {
+      console.log(
+        '[fetchAllFilesRecursive] Files found in',
+        directory,
+        ':',
+        directoryResponse.files,
+      );
+      allFiles = allFiles.concat(
+        directoryResponse.files.map((file) => ({
+          filename: `${directory}${separator || '/'}${file.filename}`,
+          size: file.size,
+        })),
+      );
+    } else {
+      console.log('[fetchAllFilesRecursive] No files found in', directory);
+    }
+
+    if (
+      directoryResponse &&
+      directoryResponse.directories &&
+      Array.isArray(directoryResponse.directories)
+    ) {
+      for (const subdir of directoryResponse.directories) {
+        const subdirPath = `${directory}${separator || '/'}${subdir.name}`;
+        console.log(
+          '[fetchAllFilesRecursive] Recursing into subdir:',
+          subdirPath,
+        );
+        const subFiles = await this.fetchAllFilesRecursive(
+          subdirPath,
+          username,
+          separator,
+        );
+        allFiles = allFiles.concat(subFiles);
+      }
+    }
+
+    return allFiles;
+  };
+
   /* eslint-disable complexity */
   download = async (username, files, selectedSubdirectories) => {
     this.setState({ downloadRequest: 'inProgress' }, async () => {
-      // Show initial progress
       toast.info(
         `Starting download process for ${selectedSubdirectories.size} subdirectories...`,
       );
       try {
-        // Create requests for selected files
         const fileRequests = (files || []).map(({ filename, size }) => ({
           filename,
           size,
         }));
-
-        // Fetch contents of selected subdirectories and create file requests
         const subdirFileRequests = [];
-        console.log(
-          'Selected subdirectories:',
-          Array.from(selectedSubdirectories),
-        );
-
+        const separator = this.props.separator || '/';
         for (const subdirName of selectedSubdirectories) {
-          // Strip the file count from the subdirectory name (e.g., "The Conference of the Birds (2)" -> "The Conference of the Birds")
           const cleanSubdirName = subdirName.replace(/\s*\(\d+\)$/u, '');
-          const subdirPath = `${this.props.name}${this.props.separator || '/'}${cleanSubdirName}`;
-          console.log('Original subdirectory name:', subdirName);
-          console.log('Clean subdirectory name:', cleanSubdirName);
-          console.log('Fetching contents for subdirectory:', subdirPath);
-
-          // Retry logic with exponential backoff
-          let response = null;
-          let lastError = null;
-          const maxRetries = 3;
-
-          for (let attempt = 1; attempt <= maxRetries; attempt++) {
-            try {
-              response = await users.getDirectoryContents({
-                directory: subdirPath,
-                username,
-              });
-
-              console.log('Subdirectory response:', response);
-              console.log('Response type:', typeof response);
-              console.log('Response is array:', Array.isArray(response));
-              console.log('Response length:', response?.length);
-              if (response && Array.isArray(response) && response.length > 0) {
-                console.log('First response item:', response[0]);
-                console.log('First item files:', response[0]?.files);
-                console.log(
-                  'First item directories:',
-                  response[0]?.directories,
-                );
-              }
-
-              break; // Success, exit retry loop
-            } catch (error) {
-              lastError = error;
-              console.warn(
-                `Attempt ${attempt}/${maxRetries} failed for subdirectory ${cleanSubdirName}:`,
-                error,
-              );
-
-              if (attempt < maxRetries) {
-                // Exponential backoff: 1s, 2s, 4s
-                const delay = 2 ** (attempt - 1) * 1_000;
-                console.log(`Retrying in ${delay}ms...`);
-                toast.info(
-                  `Retrying subdirectory '${cleanSubdirName}' in ${delay / 1_000}s (attempt ${attempt + 1}/${maxRetries})`,
-                );
-                await new Promise((resolve) => {
-                  setTimeout(resolve, delay);
-                });
-              }
-            }
-          }
-
-          if (response) {
-            // Handle different response structures
-            let discoveredFiles = [];
-
-            if (Array.isArray(response)) {
-              // Response is an array of directories
-              console.log(
-                'Response is array of directories, processing each...',
-              );
-              for (const directory of response) {
-                if (directory.files && Array.isArray(directory.files)) {
-                  discoveredFiles = discoveredFiles.concat(directory.files);
-                  console.log(
-                    `Found ${directory.files.length} files in directory: ${directory.name || 'unnamed'}`,
-                  );
-                }
-              }
-            } else if (response.files && Array.isArray(response.files)) {
-              // Response is a single directory with files
-              discoveredFiles = response.files;
-              console.log(
-                `Found ${discoveredFiles.length} files in single directory response`,
-              );
-            }
-
-            // Add all files to the download requests
-            if (discoveredFiles.length > 0) {
-              console.log(
-                `Found ${discoveredFiles.length} total files in subdirectory ${cleanSubdirName}`,
-              );
-              for (const file of discoveredFiles) {
-                const fullPath = `${subdirPath}${this.props.separator || '/'}${file.filename}`;
-                subdirFileRequests.push({
-                  filename: fullPath,
-                  size: file.size,
-                });
-                console.log('Added file to download:', fullPath, file.size);
-              }
-            } else {
-              console.log('No files found in subdirectory:', cleanSubdirName);
-            }
-          } else {
-            // All retries failed
-            console.error(
-              `Failed to fetch contents of subdirectory ${cleanSubdirName} after ${maxRetries} attempts:`,
-              lastError,
-            );
-
-            // Show user-friendly error message
-            const errorMessage =
-              lastError.response?.status === 500
-                ? `Timeout: User '${username}' is taking too long to respond for subdirectory '${cleanSubdirName}' after ${maxRetries} attempts. The user might be offline or the directory is very large.`
-                : `Failed to fetch contents of subdirectory '${cleanSubdirName}' after ${maxRetries} attempts: ${lastError.message}`;
-
-            console.warn(errorMessage);
-            toast.warning(errorMessage);
-            // Continue with other subdirectories even if one fails
+          const subdirPath = `${this.props.name}${separator}${cleanSubdirName}`;
+          const allFiles = await this.fetchAllFilesRecursive(
+            subdirPath,
+            username,
+            separator,
+          );
+          for (const file of allFiles) {
+            subdirFileRequests.push({
+              filename: file.filename,
+              size: file.size,
+            });
           }
         }
 
-        // Combine all requests
         const allRequests = [...fileRequests, ...subdirFileRequests];
-
-        console.log('Total download requests:', allRequests.length);
-        console.log('File requests:', fileRequests.length);
-        console.log('Subdirectory file requests:', subdirFileRequests.length);
-        console.log('All requests:', allRequests);
-
         if (allRequests.length > 0) {
-          console.log('Submitting download request...');
           await transfers.download({ files: allRequests, username });
-          console.log('Download request submitted successfully');
           toast.success(
             `Download request submitted successfully! ${allRequests.length} files queued for download.`,
           );
         } else {
-          console.log('No files to download');
           toast.info(
             'No files found to download from the selected subdirectories.',
           );
@@ -360,7 +324,7 @@ class Directory extends Component {
   }
 
   render() {
-    const { locked, marginTop, name, onClose, username } = this.props;
+    const { locked, marginTop, name, onClose, username, subdirectories: propSubdirs } = this.props;
     const {
       downloadError,
       downloadRequest,
@@ -368,6 +332,9 @@ class Directory extends Component {
       selectedSubdirectories,
       subdirectories,
     } = this.state;
+
+    // Debug log
+    console.log('[Directory] render: propSubdirs:', propSubdirs, 'state.subdirectories:', subdirectories);
 
     const selectedFiles = files.filter((f) => f.selected);
 
@@ -383,21 +350,21 @@ class Directory extends Component {
     };*/
 
     const allSubdirsSelected =
-      subdirectories.length > 0 &&
-      subdirectories.every((subdir) => selectedSubdirectories.has(subdir.name));
+      propSubdirs && propSubdirs.length > 0 &&
+      propSubdirs.every((subdir) => selectedSubdirectories.has(subdir.name));
 
-    const someSubdirsSelected = subdirectories.some((subdir) =>
+    const someSubdirsSelected = propSubdirs && propSubdirs.some((subdir) =>
       selectedSubdirectories.has(subdir.name),
     );
 
     const handleSelectAllSubdirs = (checked) => {
       const newSelected = new Set(selectedSubdirectories);
       if (checked) {
-        for (const subdir of subdirectories) {
+        for (const subdir of propSubdirs) {
           newSelected.add(subdir.name);
         }
       } else {
-        for (const subdir of subdirectories) {
+        for (const subdir of propSubdirs) {
           newSelected.delete(subdir.name);
         }
       }
@@ -407,7 +374,7 @@ class Directory extends Component {
 
     // Remove useState/useEffect and use this.state.totalSelectedSubdirFiles/Bytes
 
-    const hasContent = files.length > 0 || subdirectories.length > 0;
+    const hasContent = files.length > 0 || (propSubdirs && propSubdirs.length > 0);
 
     return (
       <Card
@@ -438,7 +405,7 @@ class Directory extends Component {
             {hasContent ? (
               <>
                 {/* Subdirectories Section */}
-                {subdirectories.length > 0 && (
+                {propSubdirs && propSubdirs.length > 0 && (
                   <div style={{ marginBottom: '20px' }}>
                     <h4 style={{ color: '#333', margin: '10px 0' }}>
                       Subdirectories
@@ -461,7 +428,7 @@ class Directory extends Component {
                       relaxed
                     >
                       {this.renderSubdirectoryList(
-                        subdirectories,
+                        propSubdirs,
                         selectedSubdirectories,
                         downloadRequest,
                         locked,

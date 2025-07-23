@@ -1,16 +1,16 @@
-import './Search.css';
-import { createSearchHubConnection } from '../../lib/hubFactory';
-import * as library from '../../lib/searches';
-import ErrorSegment from '../Shared/ErrorSegment';
-import LoaderSegment from '../Shared/LoaderSegment';
-import PlaceholderSegment from '../Shared/PlaceholderSegment';
-import SearchDetail from './Detail/SearchDetail';
-import SearchList from './List/SearchList';
-import React, { useEffect, useRef, useState } from 'react';
-import { useHistory, useParams, useRouteMatch } from 'react-router-dom';
-import { toast } from 'react-toastify';
-import { Button, Icon, Input, Segment } from 'semantic-ui-react';
-import { v4 as uuidv4 } from 'uuid';
+import "./Search.css";
+import { createSearchHubConnection } from "../../lib/hubFactory";
+import * as library from "../../lib/searches";
+import ErrorSegment from "../Shared/ErrorSegment";
+import LoaderSegment from "../Shared/LoaderSegment";
+import PlaceholderSegment from "../Shared/PlaceholderSegment";
+import SearchDetail from "./Detail/SearchDetail";
+import SearchList from "./List/SearchList";
+import React, { useEffect, useRef, useState } from "react";
+import { useHistory, useParams, useRouteMatch } from "react-router-dom";
+import { toast } from "react-toastify";
+import { Button, Icon, Input, Segment } from "semantic-ui-react";
+import { v4 as uuidv4 } from "uuid";
 
 const Searches = ({ server } = {}) => {
   const [connecting, setConnecting] = useState(true);
@@ -51,7 +51,7 @@ const Searches = ({ server } = {}) => {
 
     const searchHub = createSearchHubConnection();
 
-    searchHub.on('list', (searchesEvent) => {
+    searchHub.on("list", (searchesEvent) => {
       onUpdate(
         searchesEvent.reduce((accumulator, search) => {
           accumulator[search.id] = search;
@@ -61,27 +61,27 @@ const Searches = ({ server } = {}) => {
       onConnected();
     });
 
-    searchHub.on('update', (search) => {
+    searchHub.on("update", (search) => {
       onUpdate((old) => ({ ...old, [search.id]: search }));
     });
 
-    searchHub.on('delete', (search) => {
+    searchHub.on("delete", (search) => {
       onUpdate((old) => {
         delete old[search.id];
         return { ...old };
       });
     });
 
-    searchHub.on('create', (search) => {
+    searchHub.on("create", (search) => {
       onUpdate((old) => ({ ...old, [search.id]: search }));
     });
 
     searchHub.onreconnecting((connectionError) =>
-      onConnectionError(connectionError?.message ?? 'Disconnected'),
+      onConnectionError(connectionError?.message ?? "Disconnected"),
     );
     searchHub.onreconnected(() => onConnected());
     searchHub.onclose((connectionError) =>
-      onConnectionError(connectionError?.message ?? 'Disconnected'),
+      onConnectionError(connectionError?.message ?? "Disconnected"),
     );
 
     const connect = async () => {
@@ -89,8 +89,8 @@ const Searches = ({ server } = {}) => {
         onConnecting();
         await searchHub.start();
       } catch (connectionError) {
-        toast.error(connectionError?.message ?? 'Failed to connect');
-        onConnectionError(connectionError?.message ?? 'Failed to connect');
+        toast.error(connectionError?.message ?? "Failed to connect");
+        onConnectionError(connectionError?.message ?? "Failed to connect");
       }
     };
 
@@ -113,7 +113,7 @@ const Searches = ({ server } = {}) => {
       await library.create({ id, searchText });
 
       try {
-        ref.value = '';
+        ref.value = "";
         ref.focus();
       } catch {
         // we are probably repeating an existing search; the input isn't mounted.  no-op.
@@ -122,7 +122,7 @@ const Searches = ({ server } = {}) => {
       setCreating(false);
 
       if (navigate) {
-        history.push(`${match.url.replace(`/${searchId}`, '')}/${id}`);
+        history.push(`${match.url.replace(`/${searchId}`, "")}/${id}`);
       }
     } catch (createError) {
       console.error(createError);
@@ -197,22 +197,16 @@ const Searches = ({ server } = {}) => {
 
     // if the searchId doesn't match a search we know about, chop
     // the id off of the url and force navigation back to the list
-    history.replace(match.url.replace(`/${searchId}`, ''));
+    history.replace(match.url.replace(`/${searchId}`, ""));
   }
 
   inputRef?.current?.inputRef?.current.focus();
 
   return (
     <>
-      <Segment
-        className="search-segment"
-        raised
-      >
+      <Segment className="search-segment" raised>
         <div className="search-segment-icon">
-          <Icon
-            name="search"
-            size="big"
-          />
+          <Icon name="search" size="big" />
         </div>
         <Input
           action={
@@ -236,24 +230,21 @@ const Searches = ({ server } = {}) => {
               data-lpignore="true"
               placeholder={
                 server.isConnected
-                  ? 'Search phrase'
-                  : 'Connect to server to perform a search'
+                  ? "Search phrase"
+                  : "Connect to server to perform a search"
               }
               type="search"
             />
           }
           loading={creating}
-          onKeyUp={(keyUpEvent) => (keyUpEvent.key === 'Enter' ? create() : '')}
+          onKeyUp={(keyUpEvent) => (keyUpEvent.key === "Enter" ? create() : "")}
           placeholder="Search phrase"
           ref={inputRef}
           size="big"
         />
       </Segment>
       {Object.keys(searches).length === 0 ? (
-        <PlaceholderSegment
-          caption="No searches to display"
-          icon="search"
-        />
+        <PlaceholderSegment caption="No searches to display" icon="search" />
       ) : (
         <SearchList
           connecting={connecting}

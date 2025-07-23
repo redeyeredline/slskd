@@ -1,7 +1,7 @@
-import { Switch } from '../../Shared';
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { Icon, Table } from 'semantic-ui-react';
+import { Switch } from "../../Shared";
+import React from "react";
+import { Link } from "react-router-dom";
+import { Icon, Table } from "semantic-ui-react";
 
 const ShareTable = ({ onClick, shares }) => {
   return (
@@ -29,8 +29,8 @@ const ShareTable = ({ onClick, shares }) => {
                   colSpan={6}
                   style={{
                     opacity: 0.5,
-                    padding: '10px !important',
-                    textAlign: 'center',
+                    padding: "10px !important",
+                    textAlign: "center",
                   }}
                 >
                   No shares configured
@@ -46,8 +46,8 @@ const ShareTable = ({ onClick, shares }) => {
                 <Icon name="folder" />
                 <Link to="#">{share.localPath}</Link>
               </Table.Cell>
-              <Table.Cell>{share.directories ?? '?'}</Table.Cell>
-              <Table.Cell>{share.files ?? '?'}</Table.Cell>
+              <Table.Cell>{share.directories ?? "?"}</Table.Cell>
+              <Table.Cell>{share.files ?? "?"}</Table.Cell>
               <Table.Cell>{share.alias}</Table.Cell>
               <Table.Cell>{share.remotePath}</Table.Cell>
             </Table.Row>

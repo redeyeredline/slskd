@@ -1,10 +1,10 @@
-import { hubBaseUrl } from '../config';
-import { getToken, isPassthroughEnabled } from './token';
+import { hubBaseUrl } from "../config";
+import { getToken, isPassthroughEnabled } from "./token";
 import {
   HubConnectionBuilder,
   JsonHubProtocol,
   LogLevel,
-} from '@microsoft/signalr';
+} from "@microsoft/signalr";
 
 export const createHubConnection = ({ url }) =>
   new HubConnectionBuilder()

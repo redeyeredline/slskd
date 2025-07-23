@@ -1,15 +1,15 @@
-import './System.css';
-import { Switch } from '../Shared';
-import Data from './Data';
-import Events from './Events';
-import Files from './Files';
-import Info from './Info';
-import Logs from './Logs';
-import Options from './Options';
-import Shares from './Shares';
-import React from 'react';
-import { Redirect, useHistory, useRouteMatch } from 'react-router-dom';
-import { Icon, Menu, Segment, Tab } from 'semantic-ui-react';
+import "./System.css";
+import { Switch } from "../Shared";
+import Data from "./Data";
+import Events from "./Events";
+import Files from "./Files";
+import Info from "./Info";
+import Logs from "./Logs";
+import Options from "./Options";
+import Shares from "./Shares";
+import React from "react";
+import { Redirect, useHistory, useRouteMatch } from "react-router-dom";
+import { Icon, Menu, Segment, Tab } from "semantic-ui-react";
 
 const System = ({ options = {}, state = {}, theme }) => {
   const {
@@ -26,10 +26,7 @@ const System = ({ options = {}, state = {}, theme }) => {
             pending={
               ((state?.pendingRestart ?? false) ||
                 (state?.pendingReconnect ?? false)) && (
-                <Icon
-                  color="yellow"
-                  name="exclamation circle"
-                />
+                <Icon color="yellow" name="exclamation circle" />
               )
             }
           >
@@ -40,29 +37,23 @@ const System = ({ options = {}, state = {}, theme }) => {
       ),
       render: () => (
         <Tab.Pane>
-          <Info
-            state={state}
-            theme={theme}
-          />
+          <Info state={state} theme={theme} />
         </Tab.Pane>
       ),
-      route: 'info',
+      route: "info",
     },
     {
       menuItem: {
-        content: 'Options',
-        icon: 'options',
-        key: 'options',
+        content: "Options",
+        icon: "options",
+        key: "options",
       },
       render: () => (
         <Tab.Pane className="full-height">
-          <Options
-            options={options}
-            theme={theme}
-          />
+          <Options options={options} theme={theme} />
         </Tab.Pane>
       ),
-      route: 'options',
+      route: "options",
     },
     {
       menuItem: (
@@ -70,10 +61,7 @@ const System = ({ options = {}, state = {}, theme }) => {
           <Switch
             scanPending={
               (state?.shares?.scanPending ?? false) && (
-                <Icon
-                  color="yellow"
-                  name="exclamation circle"
-                />
+                <Icon color="yellow" name="exclamation circle" />
               )
             }
           >
@@ -84,68 +72,62 @@ const System = ({ options = {}, state = {}, theme }) => {
       ),
       render: () => (
         <Tab.Pane>
-          <Shares
-            state={state.shares}
-            theme={theme}
-          />
+          <Shares state={state.shares} theme={theme} />
         </Tab.Pane>
       ),
-      route: 'shares',
+      route: "shares",
     },
     {
       menuItem: {
-        content: 'Files',
-        icon: 'folder open',
-        key: 'files',
+        content: "Files",
+        icon: "folder open",
+        key: "files",
       },
       render: () => (
         <Tab.Pane className="full-height">
-          <Files
-            options={options}
-            theme={theme}
-          />
+          <Files options={options} theme={theme} />
         </Tab.Pane>
       ),
-      route: 'files',
+      route: "files",
     },
     {
       menuItem: {
-        content: 'Data',
-        icon: 'database',
-        key: 'data',
+        content: "Data",
+        icon: "database",
+        key: "data",
       },
       render: () => (
         <Tab.Pane className="full-height">
           <Data theme={theme} />
         </Tab.Pane>
       ),
-      route: 'data',
+      route: "data",
     },
     {
       menuItem: {
-        content: 'Events',
-        icon: 'calendar check',
-        key: 'events',
+        content: "Events",
+        icon: "calendar check",
+        key: "events",
       },
       render: () => (
         <Tab.Pane className="full-height">
           <Events />
         </Tab.Pane>
       ),
-      route: 'events',
+      route: "events",
     },
     {
       menuItem: {
-        content: 'Logs',
-        icon: 'file outline',
-        key: 'logs',
+        content: "Logs",
+        icon: "file outline",
+        key: "logs",
       },
       render: () => (
         <Tab.Pane>
           <Logs />
         </Tab.Pane>
       ),
-      route: 'logs',
+      route: "logs",
     },
   ];
 

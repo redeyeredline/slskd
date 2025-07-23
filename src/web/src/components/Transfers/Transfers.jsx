@@ -1,10 +1,10 @@
-import './Transfers.css';
-import * as transfersLibrary from '../../lib/transfers';
-import { LoaderSegment, PlaceholderSegment } from '../Shared';
-import TransferGroup from './TransferGroup';
-import TransfersHeader from './TransfersHeader';
-import React, { useEffect, useMemo, useState } from 'react';
-import { toast } from 'react-toastify';
+import "./Transfers.css";
+import * as transfersLibrary from "../../lib/transfers";
+import { LoaderSegment, PlaceholderSegment } from "../Shared";
+import TransferGroup from "./TransferGroup";
+import TransfersHeader from "./TransfersHeader";
+import React, { useEffect, useMemo, useState } from "react";
+import { toast } from "react-toastify";
 
 const Transfers = ({ direction, server }) => {
   const [connecting, setConnecting] = useState(true);

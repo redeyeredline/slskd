@@ -1,12 +1,12 @@
-import { list } from '../../../lib/events';
-import { LoaderSegment } from '../../Shared';
-import React, { useEffect, useState } from 'react';
-import { Icon, Pagination, Popup, Table } from 'semantic-ui-react';
+import { list } from "../../../lib/events";
+import { LoaderSegment } from "../../Shared";
+import React, { useEffect, useState } from "react";
+import { Icon, Pagination, Popup, Table } from "semantic-ui-react";
 
 const PER_PAGE = 10;
 
 const replaceHyphensWithNonBreakingEquivalent = (string) =>
-  string?.replaceAll('-', '‑');
+  string?.replaceAll("-", "‑");
 
 const Events = () => {
   const [page, setPage] = useState(1);
@@ -55,10 +55,7 @@ const Events = () => {
           totalPages={totalPages}
         />
       </div>
-      <Table
-        className="events-table, unstackable"
-        compact="very"
-      >
+      <Table className="events-table, unstackable" compact="very">
         <Table.Header>
           <Table.Row>
             <Table.HeaderCell className="events-list-id">Id</Table.HeaderCell>
@@ -80,8 +77,8 @@ const Events = () => {
                 colSpan={99}
                 style={{
                   opacity: 0.5,
-                  padding: '10px !important',
-                  textAlign: 'center',
+                  padding: "10px !important",
+                  textAlign: "center",
                 }}
               >
                 No events
@@ -94,7 +91,7 @@ const Events = () => {
                   <Popup
                     content={event.id}
                     on="hover"
-                    style={{ fontFamily: 'monospace', width: '400px' }}
+                    style={{ fontFamily: "monospace", width: "400px" }}
                     trigger={<Icon name="info circle" />}
                     wide="very"
                   />

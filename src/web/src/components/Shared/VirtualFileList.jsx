@@ -1,13 +1,13 @@
-import './VirtualFileList.css';
+import "./VirtualFileList.css";
 import {
   formatAttributes,
   formatBytes,
   formatSeconds,
   getFileName,
-} from '../../lib/util';
-import React, { useMemo, useState } from 'react';
-import { FixedSizeList as List } from 'react-window';
-import { Checkbox, Header, Icon, Table } from 'semantic-ui-react';
+} from "../../lib/util";
+import React, { useMemo, useState } from "react";
+import { FixedSizeList as List } from "react-window";
+import { Checkbox, Header, Icon, Table } from "semantic-ui-react";
 
 const VirtualFileList = ({
   directoryName,
@@ -36,14 +36,11 @@ const VirtualFileList = ({
   if (!files || files.length === 0) {
     return (
       <div style={{ opacity: locked ? 0.5 : 1 }}>
-        <Header
-          className="filelist-header"
-          size="small"
-        >
+        <Header className="filelist-header" size="small">
           <div>
             <Icon
               link={!locked}
-              name={locked ? 'lock' : 'folder'}
+              name={locked ? "lock" : "folder"}
               size="large"
             />
             {directoryName}
@@ -63,7 +60,7 @@ const VirtualFileList = ({
     );
   }
 
-  // eslint-disable-next-line react/no-unstable-nested-components
+   
   const Row = ({ index, style }) => {
     const file = sortedFiles[index];
 
@@ -79,7 +76,7 @@ const VirtualFileList = ({
             />
           </Table.Cell>
           <Table.Cell className="filelist-filename">
-            {locked ? <Icon name="lock" /> : ''}
+            {locked ? <Icon name="lock" /> : ""}
             {getFileName(file.filename)}
           </Table.Cell>
           <Table.Cell className="filelist-size">
@@ -98,14 +95,11 @@ const VirtualFileList = ({
 
   return (
     <div style={{ opacity: locked ? 0.5 : 1 }}>
-      <Header
-        className="filelist-header"
-        size="small"
-      >
+      <Header className="filelist-header" size="small">
         <div>
           <Icon
             link={!locked}
-            name={locked ? 'lock' : folded ? 'folder' : 'folder open'}
+            name={locked ? "lock" : folded ? "folder" : "folder open"}
             onClick={() => !locked && setFolded(!folded)}
             size="large"
           />

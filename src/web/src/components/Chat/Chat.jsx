@@ -1,9 +1,9 @@
-import './Chat.css';
-import { activeChatKey } from '../../config';
-import * as chat from '../../lib/chat';
-import PlaceholderSegment from '../Shared/PlaceholderSegment';
-import ChatMenu from './ChatMenu';
-import React, { Component, createRef } from 'react';
+import "./Chat.css";
+import { activeChatKey } from "../../config";
+import * as chat from "../../lib/chat";
+import PlaceholderSegment from "../Shared/PlaceholderSegment";
+import ChatMenu from "./ChatMenu";
+import React, { Component, createRef } from "react";
 import {
   Card,
   Dimmer,
@@ -13,10 +13,10 @@ import {
   Loader,
   Ref,
   Segment,
-} from 'semantic-ui-react';
+} from "semantic-ui-react";
 
 const initialState = {
-  active: '',
+  active: "",
   conversations: {},
   interval: undefined,
   loading: false,
@@ -32,7 +32,7 @@ class Chat extends Component {
   componentDidMount() {
     this.setState(
       {
-        active: sessionStorage.getItem(activeChatKey) || '',
+        active: sessionStorage.getItem(activeChatKey) || "",
         interval: window.setInterval(this.fetchConversations, 5_000),
       },
       async () => {
@@ -55,7 +55,7 @@ class Chat extends Component {
 
   getFirstConversation = () => {
     const names = Object.keys(this.state.conversations);
-    return names.length > 0 ? names[0] : '';
+    return names.length > 0 ? names[0] : "";
   };
 
   fetchConversations = async () => {
@@ -79,7 +79,7 @@ class Chat extends Component {
     // check to see if the active chat is still active
     // this will happen whenever a chat is closed/removed
     if (activeConversation) {
-      console.log('active?', activeConversation);
+      console.log("active?", activeConversation);
       // *before* fetching messages, ack any unacked messages
       // for the active chat
       if (activeConversation.hasUnAcknowledgedMessages === true) {
@@ -102,12 +102,12 @@ class Chat extends Component {
   };
 
   acknowledgeMessages = async (username) => {
-    if (!username || username === '') return;
+    if (!username || username === "") return;
     await chat.acknowledge({ username });
   };
 
   sendMessage = async (username, message) => {
-    if (!username || !message || username === '') return;
+    if (!username || !message || username === "") return;
     await chat.send({ message, username });
   };
 
@@ -120,7 +120,7 @@ class Chat extends Component {
     }
 
     await this.sendMessage(active, message);
-    this.messageRef.current.value = '';
+    this.messageRef.current.value = "";
 
     // force a refresh to append the message
     // we could probably do this in the browser but we can be lazy
@@ -128,12 +128,12 @@ class Chat extends Component {
   };
 
   validInput = () =>
-    (this.state.active || '').length > 0 &&
+    (this.state.active || "").length > 0 &&
     (
       (this.messageRef &&
         this.messageRef.current &&
         this.messageRef.current.value) ||
-      ''
+      ""
     ).length > 0;
 
   focusInput = () => {
@@ -142,11 +142,11 @@ class Chat extends Component {
 
   formatTimestamp = (timestamp) => {
     const date = new Date(timestamp);
-    const dtfUS = new Intl.DateTimeFormat('en', {
-      day: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit',
-      month: 'numeric',
+    const dtfUS = new Intl.DateTimeFormat("en", {
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+      month: "numeric",
     });
 
     return dtfUS.format(date);
@@ -166,7 +166,7 @@ class Chat extends Component {
         this.setState(
           {
             conversations:
-              active === ''
+              active === ""
                 ? conversations
                 : {
                     ...conversations,
@@ -205,15 +205,9 @@ class Chat extends Component {
 
     return (
       <div className="chats">
-        <Segment
-          className="chat-segment"
-          raised
-        >
+        <Segment className="chat-segment" raised>
           <div className="chat-segment-icon">
-            <Icon
-              name="comment"
-              size="big"
-            />
+            <Icon name="comment" size="big" />
           </div>
           <ChatMenu
             active={active}
@@ -223,21 +217,12 @@ class Chat extends Component {
           />
         </Segment>
         {Boolean(active) === false ? (
-          <PlaceholderSegment
-            caption="No chats to display"
-            icon="comment"
-          />
+          <PlaceholderSegment caption="No chats to display" icon="comment" />
         ) : (
-          <Card
-            className="chat-active-card"
-            raised
-          >
+          <Card className="chat-active-card" raised>
             <Card.Content onClick={() => this.focusInput()}>
               <Card.Header>
-                <Icon
-                  color="green"
-                  name="circle"
-                />
+                <Icon color="green" name="circle" />
                 {active}
                 <Icon
                   className="close-button"
@@ -249,10 +234,7 @@ class Chat extends Component {
               </Card.Header>
               <div className="chat">
                 {loading ? (
-                  <Dimmer
-                    active
-                    inverted
-                  >
+                  <Dimmer active inverted>
                     <Loader inverted />
                   </Dimmer>
                 ) : (
@@ -262,17 +244,17 @@ class Chat extends Component {
                         <List>
                           {messages.map((message) => (
                             <List.Content
-                              className={`chat-message ${message.direction === 'Out' ? 'chat-message-self' : ''}`}
+                              className={`chat-message ${message.direction === "Out" ? "chat-message-self" : ""}`}
                               key={`${message.timestamp}+${message.message}`}
                             >
                               <span className="chat-message-time">
                                 {this.formatTimestamp(message.timestamp)}
                               </span>
                               <span className="chat-message-name">
-                                {message.direction === 'Out'
+                                {message.direction === "Out"
                                   ? user.username
                                   : message.username}
-                                :{' '}
+                                :{" "}
                               </span>
                               <span className="chat-message-message">
                                 {message.message}
@@ -286,14 +268,9 @@ class Chat extends Component {
                     <Segment className="chat-input">
                       <Input
                         action={{
-                          className: 'chat-message-button',
+                          className: "chat-message-button",
                           disabled: !this.validInput(),
-                          icon: (
-                            <Icon
-                              color="green"
-                              name="send"
-                            />
-                          ),
+                          icon: <Icon color="green" name="send" />,
                           onClick: this.sendMessage,
                         }}
                         fluid
@@ -306,7 +283,7 @@ class Chat extends Component {
                           />
                         }
                         onKeyUp={(event) =>
-                          event.key === 'Enter' ? this.sendReply() : ''
+                          event.key === "Enter" ? this.sendReply() : ""
                         }
                         ref={(input) =>
                           (this.messageRef = input && input.inputRef)

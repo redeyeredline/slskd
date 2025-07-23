@@ -374,12 +374,13 @@ namespace slskd
                     password: OptionsAtStartup.Soulseek.Connection.Proxy.Password);
             }
 
+            // Create connection options with longer timeouts for all operations
             var connectionOptions = new ConnectionOptions(
                 readBufferSize: OptionsAtStartup.Soulseek.Connection.Buffer.Read,
                 writeBufferSize: OptionsAtStartup.Soulseek.Connection.Buffer.Write,
                 writeQueueSize: OptionsAtStartup.Soulseek.Connection.Buffer.WriteQueue,
-                connectTimeout: OptionsAtStartup.Soulseek.Connection.Timeout.Connect,
-                inactivityTimeout: OptionsAtStartup.Soulseek.Connection.Timeout.Inactivity,
+                connectTimeout: 60000, // 60 second connect timeout for all connections
+                inactivityTimeout: 60000, // 60 second inactivity timeout for all connections
                 proxyOptions: proxyOptions);
 
             // os-specific keepalive is configured for long-lived connections for the server and distributed parent/children
@@ -403,7 +404,7 @@ namespace slskd
                 autoAcknowledgePrivateMessages: false,
                 acceptPrivateRoomInvitations: true,
                 serverConnectionOptions: serverOptions,
-                peerConnectionOptions: connectionOptions,
+                peerConnectionOptions: serverOptions, // Use the same longer timeout options for peer connections
                 transferConnectionOptions: transferOptions,
                 distributedConnectionOptions: distributedOptions,
                 userInfoResolver: UserInfoResolver,
@@ -1361,6 +1362,7 @@ namespace slskd
                     ConnectionOptions serverPatch = null;
                     ConnectionOptions distributedPatch = null;
                     ConnectionOptions transferPatch = null;
+                    ConnectionOptions peerConnectionPatch = null; // Declare outside the if block
 
                     if (connectionDiff.Any())
                     {
@@ -1377,12 +1379,13 @@ namespace slskd
                                 password: connection.Proxy.Password);
                         }
 
+                        // Create connection patch with longer timeouts for all operations
                         connectionPatch = new ConnectionOptions(
                             readBufferSize: connection.Buffer.Read,
                             writeBufferSize: connection.Buffer.Write,
                             writeQueueSize: connection.Buffer.WriteQueue,
-                            connectTimeout: connection.Timeout.Connect,
-                            inactivityTimeout: connection.Timeout.Inactivity,
+                            connectTimeout: 60000, // 60 second connect timeout for all connections
+                            inactivityTimeout: 60000, // 60 second inactivity timeout for all connections
                             proxyOptions: proxyPatch);
 
                         serverPatch = connectionPatch.With(configureSocketAction: socket => ConfigureSocketKeepAlive(socket, options: connection));
@@ -1402,7 +1405,7 @@ namespace slskd
                         maximumUploadSpeed: newOptions.Global.Upload.SpeedLimit,
                         maximumDownloadSpeed: newOptions.Global.Download.SpeedLimit,
                         serverConnectionOptions: serverPatch,
-                        peerConnectionOptions: connectionPatch,
+                        peerConnectionOptions: serverPatch, // Use the same longer timeout options for peer connections
                         transferConnectionOptions: transferPatch,
                         incomingConnectionOptions: connectionPatch,
                         distributedConnectionOptions: distributedPatch);

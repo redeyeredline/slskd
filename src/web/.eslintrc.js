@@ -10,17 +10,24 @@ const overrides = {
 
 /** @type {import('eslint').Linter.Config} */
 module.exports = {
-  extends: ['canonical/auto', 'canonical/browser', 'canonical/node'],
+  extends: [
+    'eslint:recommended',
+    'plugin:react/recommended',
+    'prettier',
+  ],
+  plugins: [
+    'import',
+    'promise',
+    'react-hooks',
+    'n',
+  ],
   ignorePatterns: ['build', 'node_modules', 'package-lock.json'],
   overrides: [
     {
       extends: [
-        'canonical',
-        'canonical/regexp',
-        'canonical/jsdoc',
-        'canonical/jsx-a11y',
-        'canonical/react',
-        'canonical/prettier',
+        'plugin:react/recommended',
+        'plugin:jsx-a11y/recommended',
+        'prettier',
       ],
       files: ['*.jsx'],
       parserOptions: {
@@ -36,7 +43,7 @@ module.exports = {
       },
     },
     {
-      extends: ['canonical/jest'],
+      extends: ['plugin:jest/recommended'],
       files: '*.test.{js,jsx}',
     },
   ],

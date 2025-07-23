@@ -100,24 +100,14 @@ export const sleep = (milliseconds) => {
  */
 export const downloadFile = (data, filename, mime) => {
   const blob = new Blob([data], { type: mime || 'application/octet-stream' });
-  // eslint-disable-next-line no-negated-condition
-  if (typeof window.navigator.msSaveBlob !== 'undefined') {
-    // IE workaround for "HTML7007: One or more blob URLs were
-    // revoked by closing the blob for which they were created.
-    // These URLs will no longer resolve as the data backing
-    // the URL has been freed."
-    window.navigator.msSaveBlob(blob, filename);
-  } else {
+
+  if (typeof window.navigator.msSaveBlob === 'undefined') {
     const blobURL = window.URL.createObjectURL(blob);
     const temporaryLink = document.createElement('a');
     temporaryLink.style.display = 'none';
     temporaryLink.href = blobURL;
     temporaryLink.setAttribute('download', filename);
 
-    // Safari thinks _blank anchor are pop ups. We only want to set _blank
-    // target if the browser does not support the HTML5 download attribute.
-    // This allows you to download files in desktop safari if pop up blocking
-    // is enabled.
     if (typeof temporaryLink.download === 'undefined') {
       temporaryLink.setAttribute('target', '_blank');
     }
@@ -126,5 +116,9 @@ export const downloadFile = (data, filename, mime) => {
     temporaryLink.click();
     temporaryLink.remove();
     window.URL.revokeObjectURL(blobURL);
+    return;
   }
+
+  // IE workaround
+  window.navigator.msSaveBlob(blob, filename);
 };

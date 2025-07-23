@@ -1,11 +1,11 @@
-import * as transfers from '../../lib/transfers';
-import { getDirectoryContents } from '../../lib/users';
-import { formatBytes, getDirectoryName } from '../../lib/util';
-import FileList from '../Shared/FileList';
-import React, { Component } from 'react';
-import { withRouter } from 'react-router-dom';
-import { toast } from 'react-toastify';
-import { Button, Card, Icon, Label } from 'semantic-ui-react';
+import * as transfers from "../../lib/transfers";
+import { getDirectoryContents } from "../../lib/users";
+import { formatBytes, getDirectoryName } from "../../lib/util";
+import FileList from "../Shared/FileList";
+import React, { Component } from "react";
+import { withRouter } from "react-router-dom";
+import { toast } from "react-toastify";
+import { Button, Card, Icon, Label } from "semantic-ui-react";
 
 const buildTree = (response) => {
   let { files = [] } = response;
@@ -28,7 +28,7 @@ class Response extends Component {
     super(props);
 
     this.state = {
-      downloadError: '',
+      downloadError: "",
       downloadRequest: undefined,
       fetchingDirectoryContents: false,
       isFolded: this.props.isInitiallyFolded,
@@ -52,14 +52,14 @@ class Response extends Component {
   handleFileSelectionChange = (file, state) => {
     file.selected = state;
     this.setState((previousState) => ({
-      downloadError: '',
+      downloadError: "",
       downloadRequest: undefined,
       tree: previousState.tree,
     }));
   };
 
   download = (username, files) => {
-    this.setState({ downloadRequest: 'inProgress' }, async () => {
+    this.setState({ downloadRequest: "inProgress" }, async () => {
       try {
         const requests = (files || []).map(({ filename, size }) => ({
           filename,
@@ -67,11 +67,11 @@ class Response extends Component {
         }));
         await transfers.download({ files: requests, username });
 
-        this.setState({ downloadRequest: 'complete' });
+        this.setState({ downloadRequest: "complete" });
       } catch (error) {
         this.setState({
           downloadError: error.response,
-          downloadRequest: 'error',
+          downloadRequest: "error",
         });
       }
     });
@@ -96,7 +96,7 @@ class Response extends Component {
 
         // some clients might send an empty response for some reason
         if (!theRootDirectory) {
-          throw new Error('No directories were included in the response');
+          throw new Error("No directories were included in the response");
         }
 
         const { files, name } = theRootDirectory;
@@ -137,7 +137,7 @@ class Response extends Component {
     const { response } = this.props;
 
     // Navigate to browse page with the username pre-filled
-    history.push('/browse', { user: response.username });
+    history.push("/browse", { user: response.username });
   };
 
   render() {
@@ -161,37 +161,31 @@ class Response extends Component {
     );
 
     return (
-      <Card
-        className="result-card"
-        raised
-      >
+      <Card className="result-card" raised>
         <Card.Content>
           <Card.Header>
             <Icon
               link
-              name={isFolded ? 'chevron right' : 'chevron down'}
+              name={isFolded ? "chevron right" : "chevron down"}
               onClick={this.handleToggleFolded}
             />
-            <Icon
-              color={free ? 'green' : 'yellow'}
-              name="circle"
-            />
+            <Icon color={free ? "green" : "yellow"} name="circle" />
             <button
               className="clickable-username"
               onClick={this.handleUsernameClick}
               onKeyDown={(event) => {
-                if (event.key === 'Enter' || event.key === ' ') {
+                if (event.key === "Enter" || event.key === " ") {
                   this.handleUsernameClick();
                 }
               }}
               style={{
-                background: 'none',
-                border: 'none',
-                color: '#2185d0',
-                cursor: 'pointer',
-                font: 'inherit',
+                background: "none",
+                border: "none",
+                color: "#2185d0",
+                cursor: "pointer",
+                font: "inherit",
                 padding: 0,
-                textDecoration: 'underline',
+                textDecoration: "underline",
               }}
               title="Click to browse this user's files"
               type="button"
@@ -209,13 +203,13 @@ class Response extends Component {
           <Card.Meta className="result-meta">
             <span>
               Upload Speed: {formatBytes(response.uploadSpeed)}/s, Free Upload
-              Slot: {free ? 'YES' : 'NO'}, Queue Length: {response.queueLength}
+              Slot: {free ? "YES" : "NO"}, Queue Length: {response.queueLength}
             </span>
           </Card.Meta>
           {((!isFolded && Object.keys(tree)) || []).map((directory) => (
             <FileList
               directoryName={directory}
-              disabled={downloadRequest === 'inProgress'}
+              disabled={downloadRequest === "inProgress"}
               files={tree[directory]}
               footer={
                 <button
@@ -224,16 +218,16 @@ class Response extends Component {
                     this.getFullDirectory(response.username, directory)
                   }
                   style={{
-                    backgroundColor: 'transparent',
-                    border: 'none',
-                    cursor: 'pointer',
-                    width: '100%',
+                    backgroundColor: "transparent",
+                    border: "none",
+                    cursor: "pointer",
+                    width: "100%",
                   }}
                   type="button"
                 >
                   <Icon
                     loading={fetchingDirectoryContents}
-                    name={fetchingDirectoryContents ? 'circle notch' : 'folder'}
+                    name={fetchingDirectoryContents ? "circle notch" : "folder"}
                   />
                   Get Full Directory Contents
                 </button>
@@ -251,38 +245,26 @@ class Response extends Component {
                 color="green"
                 content="Download"
                 disabled={
-                  this.props.disabled || downloadRequest === 'inProgress'
+                  this.props.disabled || downloadRequest === "inProgress"
                 }
                 icon="download"
                 label={{
-                  as: 'a',
+                  as: "a",
                   basic: false,
-                  content: `${selectedFiles.length} file${selectedFiles.length === 1 ? '' : 's'}, ${selectedSize}`,
+                  content: `${selectedFiles.length} file${selectedFiles.length === 1 ? "" : "s"}, ${selectedSize}`,
                 }}
                 labelPosition="right"
                 onClick={() => this.download(response.username, selectedFiles)}
               />
-              {downloadRequest === 'inProgress' && (
-                <Icon
-                  loading
-                  name="circle notch"
-                  size="large"
-                />
+              {downloadRequest === "inProgress" && (
+                <Icon loading name="circle notch" size="large" />
               )}
-              {downloadRequest === 'complete' && (
-                <Icon
-                  color="green"
-                  name="checkmark"
-                  size="large"
-                />
+              {downloadRequest === "complete" && (
+                <Icon color="green" name="checkmark" size="large" />
               )}
-              {downloadRequest === 'error' && (
+              {downloadRequest === "error" && (
                 <span>
-                  <Icon
-                    color="red"
-                    name="x"
-                    size="large"
-                  />
+                  <Icon color="red" name="x" size="large" />
                   <Label>
                     {downloadError.data +
                       ` (HTTP ${downloadError.status} ${downloadError.statusText})`}

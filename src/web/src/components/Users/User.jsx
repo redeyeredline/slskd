@@ -1,32 +1,25 @@
-import { Icon, Item } from 'semantic-ui-react';
+import React from "react";
+import { Icon, Item } from "semantic-ui-react";
 
 const ImagePlaceholder = () => (
   <div className="users-picture-placeholder ui small image">
-    <Icon
-      name="camera"
-      size="big"
-    />
+    <Icon name="camera" size="big" />
   </div>
 );
 
 const Presence = ({ presence }) => {
   const colors = {
-    Away: 'yellow',
-    Online: 'green',
+    Away: "yellow",
+    Online: "green",
   };
 
-  return (
-    <Icon
-      color={colors[presence] || 'grey'}
-      name="circle"
-    />
-  );
+  return <Icon color={colors[presence] || "grey"} name="circle" />;
 };
 
 const FreeUploadSlot = ({ hasFreeUploadSlot }) => (
   <Icon
-    color={hasFreeUploadSlot ? 'green' : 'red'}
-    name={hasFreeUploadSlot ? 'check' : 'close'}
+    color={hasFreeUploadSlot ? "green" : "red"}
+    name={hasFreeUploadSlot ? "check" : "close"}
   />
 );
 
@@ -43,10 +36,7 @@ const User = ({
 }) => (
   <Item>
     {hasPicture ? (
-      <Item.Image
-        size="small"
-        src={`data:image;base64,${picture}`}
-      />
+      <Item.Image size="small" src={`data:image;base64,${picture}`} />
     ) : (
       <ImagePlaceholder />
     )}
@@ -61,7 +51,7 @@ const User = ({
         Slots: {uploadSlots}, Queue Length: {queueLength}, IP Address: {address}
         , Port: {port}
       </Item.Meta>
-      <Item.Description>{description || 'No user info.'}</Item.Description>
+      <Item.Description>{description || "No user info."}</Item.Description>
     </Item.Content>
   </Item>
 );

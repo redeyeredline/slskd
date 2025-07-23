@@ -1,13 +1,13 @@
-import { getVersion, restart, shutdown } from '../../../lib/application';
+import { getVersion, restart, shutdown } from "../../../lib/application";
 import {
   CodeEditor,
   LoaderSegment,
   ShrinkableButton,
   Switch,
-} from '../../Shared';
-import React, { useEffect, useState } from 'react';
-import { Divider, Header, Modal } from 'semantic-ui-react';
-import YAML from 'yaml';
+} from "../../Shared";
+import React, { useEffect, useState } from "react";
+import { Divider, Header, Modal } from "semantic-ui-react";
+import YAML from "yaml";
 
 const Info = ({ state, theme }) => {
   const [contents, setContents] = useState();
@@ -25,7 +25,7 @@ const Info = ({ state, theme }) => {
   return (
     <>
       <div className="header-buttons">
-        <div style={{ float: 'left' }}>
+        <div style={{ float: "left" }}>
           <ShrinkableButton
             disabled={!contents}
             icon="refresh"
@@ -43,7 +43,7 @@ const Info = ({ state, theme }) => {
             onClick={() =>
               window.open(
                 `http://www.slsknet.org/qtlogin.php?username=${state?.user?.username}`,
-                '_blank',
+                "_blank",
               )
             }
           >
@@ -52,22 +52,17 @@ const Info = ({ state, theme }) => {
         </div>
         <Modal
           actions={[
-            'Cancel',
+            "Cancel",
             {
-              content: 'Shut Down',
-              key: 'done',
+              content: "Shut Down",
+              key: "done",
               negative: true,
               onClick: shutdown,
             },
           ]}
           centered
           content="Are you sure you want to shut the application down?  You'll need to manually start it again."
-          header={
-            <Header
-              content="Confirm Shutdown"
-              icon="redo"
-            />
-          }
+          header={<Header content="Confirm Shutdown" icon="redo" />}
           size="mini"
           trigger={
             <ShrinkableButton
@@ -82,26 +77,21 @@ const Info = ({ state, theme }) => {
         />
         <Modal
           actions={[
-            'Cancel',
+            "Cancel",
             {
-              content: 'Restart',
-              key: 'done',
+              content: "Restart",
+              key: "done",
               negative: true,
               onClick: restart,
             },
           ]}
           centered
           content="Are you sure you want restart the application?"
-          header={
-            <Header
-              content="Confirm Restart"
-              icon="redo"
-            />
-          }
+          header={<Header content="Confirm Restart" icon="redo" />}
           size="mini"
           trigger={
             <ShrinkableButton
-              color={pendingRestart ? 'yellow' : undefined}
+              color={pendingRestart ? "yellow" : undefined}
               disabled={!contents}
               icon="redo"
               mediaQuery="(max-width: 686px)"

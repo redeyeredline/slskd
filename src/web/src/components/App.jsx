@@ -1,24 +1,24 @@
-import 'react-toastify/dist/ReactToastify.css';
-import './App.css';
-import { urlBase } from '../config';
-import { createApplicationHubConnection } from '../lib/hubFactory';
-import * as relayAPI from '../lib/relay';
-import { connect, disconnect } from '../lib/server';
-import * as session from '../lib/session';
-import { isPassthroughEnabled } from '../lib/token';
-import AppContext from './AppContext';
-import Browse from './Browse/Browse';
-import Chat from './Chat/Chat';
-import LoginForm from './LoginForm';
-import Rooms from './Rooms/Rooms';
-import Searches from './Search/Searches';
-import ErrorSegment from './Shared/ErrorSegment';
-import System from './System/System';
-import Transfers from './Transfers/Transfers';
-import Users from './Users/Users';
-import React, { Component } from 'react';
-import { Link, Redirect, Route, Switch } from 'react-router-dom';
-import { ToastContainer } from 'react-toastify';
+import "react-toastify/dist/ReactToastify.css";
+import "./App.css";
+import { urlBase } from "../config";
+import { createApplicationHubConnection } from "../lib/hubFactory";
+import * as relayAPI from "../lib/relay";
+import { connect, disconnect } from "../lib/server";
+import * as session from "../lib/session";
+import { isPassthroughEnabled } from "../lib/token";
+import AppContext from "./AppContext";
+import Browse from "./Browse/Browse";
+import Chat from "./Chat/Chat";
+import LoginForm from "./LoginForm";
+import Rooms from "./Rooms/Rooms";
+import Searches from "./Search/Searches";
+import ErrorSegment from "./Shared/ErrorSegment";
+import System from "./System/System";
+import Transfers from "./Transfers/Transfers";
+import Users from "./Users/Users";
+import React, { Component } from "react";
+import { Link, Redirect, Route, Switch } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
 import {
   Button,
   Header,
@@ -28,7 +28,7 @@ import {
   Modal,
   Segment,
   Sidebar,
-} from 'semantic-ui-react';
+} from "semantic-ui-react";
 
 const initialState = {
   applicationOptions: {},
@@ -50,9 +50,9 @@ const ModeSpecificConnectButton = ({
   server,
   user,
 }) => {
-  if (mode === 'Agent') {
-    const isConnected = controller?.state === 'Connected';
-    const isTransitioning = ['Connecting', 'Reconnecting'].includes(
+  if (mode === "Agent") {
+    const isConnected = controller?.state === "Connected";
+    const isTransitioning = ["Connecting", "Reconnecting"].includes(
       controller?.state,
     );
 
@@ -65,11 +65,11 @@ const ModeSpecificConnectButton = ({
         <Icon.Group className="menu-icon-group">
           <Icon
             color={
-              controller?.state === 'Connected'
-                ? 'green'
+              controller?.state === "Connected"
+                ? "green"
                 : isTransitioning
-                  ? 'yellow'
-                  : 'grey'
+                  ? "yellow"
+                  : "grey"
             }
             name="plug"
           />
@@ -90,10 +90,7 @@ const ModeSpecificConnectButton = ({
       return (
         <Menu.Item onClick={() => disconnect()}>
           <Icon.Group className="menu-icon-group">
-            <Icon
-              color={pendingReconnect ? 'yellow' : 'green'}
-              name="plug"
-            />
+            <Icon color={pendingReconnect ? "yellow" : "green"} name="plug" />
             {user?.privileges?.isPrivileged && (
               <Icon
                 className="menu-icon-no-shadow"
@@ -113,26 +110,23 @@ const ModeSpecificConnectButton = ({
     // - nothing. the client was manually disconnected, kicked off by another login, etc., and we're not trying to connect
     // - actively trying to make a connection to the server
     // - still trying to connect, but waiting for the next connection attempt
-    let icon = 'close';
-    let color = 'red';
+    let icon = "close";
+    let color = "red";
 
     if (connectionWatchdog?.isAttemptingConnection) {
-      icon = 'clock';
-      color = 'yellow';
+      icon = "clock";
+      color = "yellow";
     }
 
     if (server?.isConnecting || server?.IsLoggingIn) {
-      icon = 'sync alternate loading';
-      color = 'green';
+      icon = "sync alternate loading";
+      color = "green";
     }
 
     return (
       <Menu.Item onClick={() => connect()}>
         <Icon.Group className="menu-icon-group">
-          <Icon
-            color="grey"
-            name="plug"
-          />
+          <Icon color="grey" name="plug" />
           <Icon
             className="menu-icon-no-shadow"
             color={color}
@@ -156,16 +150,16 @@ class App extends Component {
   componentDidMount() {
     if (this.getSavedTheme() == null) {
       window
-        .matchMedia('(prefers-color-scheme: dark)')
+        .matchMedia("(prefers-color-scheme: dark)")
         .addEventListener(
-          'change',
-          (event) => event.matches && this.setState({ theme: 'dark' }),
+          "change",
+          (event) => event.matches && this.setState({ theme: "dark" }),
         );
       window
-        .matchMedia('(prefers-color-scheme: light)')
+        .matchMedia("(prefers-color-scheme: light)")
         .addEventListener(
-          'change',
-          (event) => event.matches && this.setState({ theme: 'light' }),
+          "change",
+          (event) => event.matches && this.setState({ theme: "light" }),
         );
     }
 
@@ -178,18 +172,18 @@ class App extends Component {
         const securityEnabled = await session.getSecurityEnabled();
 
         if (!securityEnabled) {
-          console.debug('application security is not enabled, per api call');
+          console.debug("application security is not enabled, per api call");
           session.enablePassthrough();
         }
 
         if (await session.check()) {
           const appHub = createApplicationHubConnection();
 
-          appHub.on('state', (state) => {
+          appHub.on("state", (state) => {
             this.setState({ applicationState: state });
           });
 
-          appHub.on('options', (options) => {
+          appHub.on("options", (options) => {
             this.setState({ applicationOptions: options });
           });
 
@@ -224,13 +218,13 @@ class App extends Component {
   };
 
   getSavedTheme = () => {
-    return localStorage.getItem('slskd-theme');
+    return localStorage.getItem("slskd-theme");
   };
 
   toggleTheme = () => {
     this.setState((state) => {
-      const newTheme = state.theme === 'dark' ? 'light' : 'dark';
-      localStorage.setItem('slskd-theme', newTheme);
+      const newTheme = state.theme === "dark" ? "light" : "dark";
+      localStorage.setItem("slskd-theme", newTheme);
       return { theme: newTheme };
     });
   };
@@ -277,9 +271,9 @@ class App extends Component {
       login,
       retriesExhausted,
       theme = this.getSavedTheme() ||
-        (window.matchMedia('(prefers-color-scheme: dark)').matches
-          ? 'dark'
-          : 'light'),
+        (window.matchMedia("(prefers-color-scheme: dark)").matches
+          ? "dark"
+          : "light"),
     } = this.state;
     const {
       connectionWatchdog = {},
@@ -297,12 +291,7 @@ class App extends Component {
     const { controller, mode } = relay;
 
     if (!initialized) {
-      return (
-        <Loader
-          active
-          size="big"
-        />
-      );
+      return <Loader active size="big" />;
     }
 
     if (error) {
@@ -313,7 +302,7 @@ class App extends Component {
               <span>Lost connection to slskd</span>
               <br />
               <span>
-                {retriesExhausted ? 'Refresh to reconnect' : 'Retrying...'}
+                {retriesExhausted ? "Refresh to reconnect" : "Retrying..."}
               </span>
             </>
           }
@@ -334,20 +323,17 @@ class App extends Component {
       );
     }
 
-    const isAgent = mode === 'Agent';
+    const isAgent = mode === "Agent";
 
-    if (theme === 'dark') {
+    if (theme === "dark") {
       document.documentElement.classList.add(theme);
     } else {
-      document.documentElement.classList.remove('dark');
+      document.documentElement.classList.remove("dark");
     }
 
     return (
       <>
-        <Sidebar.Pushable
-          as={Segment}
-          className="app"
-        >
+        <Sidebar.Pushable as={Segment} className="app">
           <Sidebar
             animation="overlay"
             as={Menu}
@@ -361,10 +347,7 @@ class App extends Component {
           >
             {version.isCanary && (
               <Menu.Item>
-                <Icon
-                  color="yellow"
-                  name="flask"
-                />
+                <Icon color="yellow" name="flask" />
                 Canary
               </Menu.Item>
             )}
@@ -419,10 +402,7 @@ class App extends Component {
                 </Link>
               </>
             )}
-            <Menu
-              className="right"
-              inverted
-            >
+            <Menu className="right" inverted>
               <Menu.Item onClick={() => this.toggleTheme()}>
                 <Icon name="theme" />
                 Theme
@@ -439,10 +419,7 @@ class App extends Component {
                 <Menu.Item position="right">
                   <Icon.Group className="menu-icon-group">
                     <Link to={`${urlBase}/system/info`}>
-                      <Icon
-                        color="yellow"
-                        name="exclamation circle"
-                      />
+                      <Icon color="yellow" name="exclamation circle" />
                     </Link>
                   </Icon.Group>
                   Pending Action
@@ -456,10 +433,7 @@ class App extends Component {
                   trigger={
                     <Menu.Item position="right">
                       <Icon.Group className="menu-icon-group">
-                        <Icon
-                          color="yellow"
-                          name="bullhorn"
-                        />
+                        <Icon color="yellow" name="bullhorn" />
                       </Icon.Group>
                       New Version!
                     </Menu.Item>
@@ -468,7 +442,7 @@ class App extends Component {
                   <Modal.Header>New Version!</Modal.Header>
                   <Modal.Content>
                     <p>
-                      You are currently running version{' '}
+                      You are currently running version{" "}
                       <strong>{current}</strong>
                       while version <strong>{latest}</strong> is available.
                     </p>
@@ -494,22 +468,17 @@ class App extends Component {
               {session.isLoggedIn() && (
                 <Modal
                   actions={[
-                    'Cancel',
+                    "Cancel",
                     {
-                      content: 'Log Out',
-                      key: 'done',
+                      content: "Log Out",
+                      key: "done",
                       negative: true,
                       onClick: this.logout,
                     },
                   ]}
                   centered
                   content="Are you sure you want to log out?"
-                  header={
-                    <Header
-                      content="Confirm Log Out"
-                      icon="sign-out"
-                    />
-                  }
+                  header={<Header content="Confirm Log Out" icon="sign-out" />}
                   size="mini"
                   trigger={
                     <Menu.Item>
@@ -523,9 +492,9 @@ class App extends Component {
           </Sidebar>
           <Sidebar.Pusher className="app-content">
             <AppContext.Provider
-              // eslint-disable-next-line no-warning-comments
+               
               // TODO: needs useMemo, but class component. yolo for now.
-              // eslint-disable-next-line react/jsx-no-constructed-context-values
+               
               value={{ options: applicationOptions, state: applicationState }}
             >
               {isAgent ? (
@@ -542,10 +511,7 @@ class App extends Component {
                       )
                     }
                   />
-                  <Redirect
-                    from="*"
-                    to={`${urlBase}/system`}
-                  />
+                  <Redirect from="*" to={`${urlBase}/system`} />
                 </Switch>
               ) : (
                 <Switch>
@@ -578,10 +544,7 @@ class App extends Component {
                     path={`${urlBase}/chat`}
                     render={(props) =>
                       this.withTokenCheck(
-                        <Chat
-                          {...props}
-                          state={applicationState}
-                        />,
+                        <Chat {...props} state={applicationState} />,
                       )
                     }
                   />
@@ -596,10 +559,7 @@ class App extends Component {
                     render={(props) =>
                       this.withTokenCheck(
                         <div className="view">
-                          <Transfers
-                            {...props}
-                            direction="upload"
-                          />
+                          <Transfers {...props} direction="upload" />
                         </div>,
                       )
                     }
@@ -631,10 +591,7 @@ class App extends Component {
                       )
                     }
                   />
-                  <Redirect
-                    from="*"
-                    to={`${urlBase}/searches`}
-                  />
+                  <Redirect from="*" to={`${urlBase}/searches`} />
                 </Switch>
               )}
             </AppContext.Provider>

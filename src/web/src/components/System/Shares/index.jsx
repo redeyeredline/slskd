@@ -1,15 +1,15 @@
-import * as sharesLibrary from '../../../lib/shares';
-import { LoaderSegment, ShrinkableButton, Switch } from '../../Shared';
-import ContentsModal from './ContentsModal';
-import ExclusionTable from './ExclusionTable';
-import ShareTable from './ShareTable';
-import React, { useEffect, useState } from 'react';
-import { toast } from 'react-toastify';
-import { Divider } from 'semantic-ui-react';
+import * as sharesLibrary from "../../../lib/shares";
+import { LoaderSegment, ShrinkableButton, Switch } from "../../Shared";
+import ContentsModal from "./ContentsModal";
+import ExclusionTable from "./ExclusionTable";
+import ShareTable from "./ShareTable";
+import React, { useEffect, useState } from "react";
+import { toast } from "react-toastify";
+import { Divider } from "semantic-ui-react";
 
 const ScanButton = ({ rescan, scanPending, working }) => (
   <ShrinkableButton
-    color={scanPending ? 'yellow' : undefined}
+    color={scanPending ? "yellow" : undefined}
     disabled={working}
     icon="refresh"
     loading={working}
@@ -101,7 +101,7 @@ const Shares = ({ state = {}, theme } = {}) => {
         error?.response?.data ??
           error?.message ??
           error ??
-          'Failed to cancel the scan',
+          "Failed to cancel the scan",
       );
     } finally {
       setWorking(false);
@@ -116,12 +116,7 @@ const Shares = ({ state = {}, theme } = {}) => {
       <div className="header-buttons">
         <Switch
           scanning={
-            scanning && (
-              <CancelButton
-                cancel={cancel}
-                working={working}
-              />
-            )
+            scanning && <CancelButton cancel={cancel} working={working} />
           }
         >
           <ScanButton
@@ -146,10 +141,7 @@ const Shares = ({ state = {}, theme } = {}) => {
           )
         }
       >
-        <ShareTable
-          onClick={setModal}
-          shares={shared}
-        />
+        <ShareTable onClick={setModal} shares={shared} />
         <ExclusionTable exclusions={excluded} />
       </Switch>
       <ContentsModal

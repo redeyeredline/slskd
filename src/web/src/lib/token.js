@@ -1,4 +1,4 @@
-import { tokenKey, tokenPassthroughValue } from '../config';
+import { tokenKey, tokenPassthroughValue } from "../config";
 
 export const getToken = () =>
   sessionStorage.getItem(tokenKey) || localStorage.getItem(tokenKey);

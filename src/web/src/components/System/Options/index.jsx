@@ -3,12 +3,12 @@ import {
   LoaderSegment,
   ShrinkableButton,
   Switch,
-} from '../../Shared';
-import DebugModal from './DebugModal';
-import EditModal from './EditModal';
-import React, { useEffect, useState } from 'react';
-import { Divider } from 'semantic-ui-react';
-import YAML from 'yaml';
+} from "../../Shared";
+import DebugModal from "./DebugModal";
+import EditModal from "./EditModal";
+import React, { useEffect, useState } from "react";
+import { Divider } from "semantic-ui-react";
+import YAML from "yaml";
 
 const DebugButton = ({
   debug,
@@ -33,11 +33,7 @@ const DebugButton = ({
 const EditButton = ({ remoteConfiguration, setEditModal, ...props }) => {
   if (!remoteConfiguration) {
     return (
-      <ShrinkableButton
-        disabled
-        icon="lock"
-        mediaQuery="(max-width: 516px)"
-      >
+      <ShrinkableButton disabled icon="lock" mediaQuery="(max-width: 516px)">
         Remote Configuration Disabled
       </ShrinkableButton>
     );

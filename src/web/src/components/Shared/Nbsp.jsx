@@ -1,5 +1,5 @@
 const Nbsp = () => {
-  return ' ';
+  return " ";
 };
 
 export default Nbsp;

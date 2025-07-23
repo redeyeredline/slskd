@@ -1,6 +1,6 @@
-import { apiBaseUrl } from '../config';
-import { clearToken, getToken, isPassthroughEnabled } from './token';
-import axios from 'axios';
+import { apiBaseUrl } from "../config";
+import { clearToken, getToken, isPassthroughEnabled } from "./token";
+import axios from "axios";
 
 axios.defaults.baseURL = apiBaseUrl;
 
@@ -11,10 +11,10 @@ const api = axios.create({
 api.interceptors.request.use((config) => {
   const token = getToken();
 
-  config.headers['Content-Type'] = 'application/json';
+  config.headers["Content-Type"] = "application/json";
 
   if (!isPassthroughEnabled() && token) {
-    config.headers.Authorization = 'Bearer ' + token;
+    config.headers.Authorization = "Bearer " + token;
   }
 
   return config;
@@ -27,11 +27,11 @@ api.interceptors.response.use(
   (error) => {
     if (
       error.response.status === 401 &&
-      !['/session', '/server', '/application'].includes(
+      !["/session", "/server", "/application"].includes(
         error.response.config.url,
       )
     ) {
-      console.debug('received 401 from api route, logging out');
+      console.debug("received 401 from api route, logging out");
       clearToken();
       window.location.reload(true);
 
