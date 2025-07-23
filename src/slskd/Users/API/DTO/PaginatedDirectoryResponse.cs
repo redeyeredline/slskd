@@ -66,4 +66,4 @@ namespace slskd.Users.API.DTO
         /// </summary>
         public bool HasPreviousPage { get; set; }
     }
-} 
+}

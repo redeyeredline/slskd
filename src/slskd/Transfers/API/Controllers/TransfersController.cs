@@ -230,7 +230,7 @@ namespace slskd.Transfers.API
         [HttpGet("downloads")]
         [Authorize(Policy = AuthPolicy.Any)]
         [ProducesResponseType(200)]
-        public IActionResult GetDownloadsAsync([FromQuery] bool includeRemoved = false)
+        public async Task<IActionResult> GetDownloadsAsync([FromQuery] bool includeRemoved = false)
         {
             if (Program.IsRelayAgent)
             {
@@ -238,6 +238,20 @@ namespace slskd.Transfers.API
             }
 
             var downloads = Transfers.Downloads.List(includeRemoved: includeRemoved);
+
+            // Update queue position for all queued downloads
+            var queued = downloads.Where(t => t.State.ToString().Contains("Queued")).ToList();
+            foreach (var transfer in queued)
+            {
+                try
+                {
+                    transfer.PlaceInQueue = await Transfers.Downloads.GetPlaceInQueueAsync(transfer.Id);
+                }
+                catch
+                {
+                    // ignore errors (e.g., not found)
+                }
+            }
 
             var response = downloads.GroupBy(t => t.Username).Select(grouping => new UserResponse()
             {

@@ -2,6 +2,7 @@ import * as transfers from "../../lib/transfers";
 import TransferList from "./TransferList";
 import React, { Component } from "react";
 import { Button, Card, Icon } from "semantic-ui-react";
+import { withRouter } from "react-router-dom";
 
 class TransferGroup extends Component {
   constructor(props) {
@@ -107,7 +108,7 @@ class TransferGroup extends Component {
   };
 
   render() {
-    const { direction, user } = this.props;
+    const { direction, user, history } = this.props;
     const { isFolded } = this.state;
 
     const selected = this.getSelectedFiles();
@@ -123,6 +124,10 @@ class TransferGroup extends Component {
       selected.filter((f) => transfers.isStateRemovable(f.state)).length ===
       selected.length;
 
+    const handleUsernameClick = () => {
+      history.push("/browse", { user: user.username });
+    };
+
     return (
       <Card className="transfer-card" key={user.username} raised>
         <Card.Content>
@@ -132,7 +137,24 @@ class TransferGroup extends Component {
               name={isFolded ? "chevron right" : "chevron down"}
               onClick={() => this.toggleFolded()}
             />
-            {user.username}
+            <button
+              className="clickable-username"
+              onClick={handleUsernameClick}
+              style={{
+                background: "none",
+                border: "none",
+                color: "#2185d0",
+                cursor: "pointer",
+                font: "inherit",
+                padding: 0,
+                textDecoration: "underline",
+                marginLeft: 8,
+              }}
+              title="Click to browse this user's files"
+              type="button"
+            >
+              {user.username}
+            </button>
           </Card.Header>
           {user.directories &&
             !isFolded &&
@@ -194,4 +216,4 @@ class TransferGroup extends Component {
   }
 }
 
-export default TransferGroup;
+export default withRouter(TransferGroup);
