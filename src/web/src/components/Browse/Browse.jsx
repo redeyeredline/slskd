@@ -1,13 +1,12 @@
 /* eslint-disable promise/prefer-await-to-then */
 import './Browse.css';
 import * as users from '../../lib/users';
-import PlaceholderSegment from '../Shared/PlaceholderSegment';
 import Directory from './Directory';
 import DirectoryTree from './DirectoryTree';
 import * as lzString from 'lz-string';
 import React, { Component } from 'react';
 import { withRouter } from 'react-router-dom';
-import { Card, Icon, Input, Loader, Segment } from 'semantic-ui-react';
+import { Button, Card, Icon, Input, Loader, Segment } from 'semantic-ui-react';
 
 const initialState = {
   browseError: undefined,
@@ -25,6 +24,7 @@ const initialState = {
   separator: '\\',
   tree: [],
   username: '',
+  treeFilter: '',
 };
 
 class Browse extends Component {
@@ -59,14 +59,39 @@ class Browse extends Component {
   browse = () => {
     const username = this.inputtext.inputRef.current.value;
 
+    // Clear any existing interval before starting a new browse
+    if (this.state.interval) {
+      clearInterval(this.state.interval);
+    }
+
     this.setState(
       { browseError: undefined, browseState: 'pending', username },
       () => {
+        // Start status polling for this browse
+        this.setState({
+          interval: window.setInterval(this.fetchStatus, 500),
+        });
+
+        // Use regular browse to get ALL directories, but implement lazy loading
         users
           .browse({ username })
           .then((response) => {
-            let { directories } = response;
-            const { lockedDirectories } = response;
+            // Ensure we have valid response data
+            if (!response || typeof response !== 'object') {
+              throw new Error('Invalid response from server');
+            }
+
+            let { directories = [] } = response;
+            let { lockedDirectories = [] } = response;
+
+            // Ensure directories and lockedDirectories are arrays
+            if (!Array.isArray(directories)) {
+              directories = [];
+            }
+
+            if (!Array.isArray(lockedDirectories)) {
+              lockedDirectories = [];
+            }
 
             // we need to know the directory separator. assume it is \ to start
             let separator;
@@ -74,25 +99,28 @@ class Browse extends Component {
             const directoryCount = directories.length;
             const fileCount = directories.reduce((accumulator, directory) => {
               // examine each directory as we process it to see if it contains \ or /, and set separator accordingly
-              if (!separator) {
-                if (directory.name.includes('\\')) separator = '\\';
-                else if (directory.name.includes('/')) separator = '/';
+              if (separator === undefined) {
+                if (directory.name.includes('\\')) {
+                  separator = '\\';
+                } else if (directory.name.includes('/')) {
+                  separator = '/';
+                }
               }
 
-              return accumulator + directory.fileCount;
+              return accumulator + (directory.fileCount || 0);
             }, 0);
 
             const lockedDirectoryCount = lockedDirectories.length;
-            const lockedFileCount = lockedDirectories.reduce(
-              (accumulator, directory) => accumulator + directory.fileCount,
-              0,
-            );
+            const lockedFileCount = lockedDirectories.reduce((accumulator, directory) => {
+              return accumulator + (directory.fileCount || 0);
+            }, 0);
 
-            directories = directories.concat(
-              lockedDirectories.map((d) => ({ ...d, locked: true })),
-            );
+            // Create a lazy-loading tree structure
+            const tree = this.getDirectoryTree({ directories, separator });
 
-            this.setState({
+            this.setState(
+              {
+                browseState: 'complete',
               info: {
                 directories: directoryCount,
                 files: fileCount,
@@ -100,20 +128,48 @@ class Browse extends Component {
                 lockedFiles: lockedFileCount,
               },
               separator,
-              tree: this.getDirectoryTree({ directories, separator }),
-            });
-          })
-          .then(() =>
-            this.setState(
-              { browseError: undefined, browseState: 'complete' },
-              () => {
-                this.saveState();
+              tree,
               },
-            ),
-          )
-          .catch((error) =>
-            this.setState({ browseError: error, browseState: 'error' }),
-          );
+              () => this.saveState(),
+            );
+          })
+          .catch((error) => {
+            console.error('Browse failed:', error);
+
+            // Enhanced error handling for massive users
+            let errorMessage = error.message || `Failed to browse ${username}`;
+            let originalError = null;
+            
+            if (error.response && error.response.status) {
+              // Server responded with an error
+              if (error.response.status === 408) {
+                errorMessage = `Browse timed out - ${username} may have too many files (try using search to find specific folders)`;
+              } else if (error.response.status === 500) {
+                errorMessage = `Server error - ${username} may have too many files for the server to handle`;
+              } else if (error.response.status === 404) {
+                errorMessage = `User not found or share is too large to load (${username})`;
+              } else {
+                errorMessage = error.response.data || errorMessage;
+              }
+              originalError = error;
+            } else if (error.request) {
+              // Request was made but no response received
+              errorMessage = `No response from server - ${username} may have too many files causing a timeout`;
+              originalError = error;
+            } else {
+              // No response or request, likely a client-side or network error
+              errorMessage = `Failed to load user share. The user may have too many files, or there was a network error.`;
+              originalError = error;
+            }
+
+            this.setState({
+              browseError: {
+                message: errorMessage,
+                originalError,
+              },
+              browseState: 'error',
+            });
+          });
       },
     );
   };
@@ -122,6 +178,12 @@ class Browse extends Component {
     this.setState(initialState, () => {
       this.saveState();
       this.inputtext.focus();
+    });
+  };
+
+  handleRetryBrowse = () => {
+    this.setState({ browseError: undefined }, () => {
+      this.browse();
     });
   };
 
@@ -166,70 +228,162 @@ class Browse extends Component {
 
   fetchStatus = () => {
     const { browseState, username } = this.state;
-    if (browseState === 'pending') {
-      users.getBrowseStatus({ username }).then((response) =>
-        this.setState({
-          browseStatus: response.data,
-        }),
-      );
+    if (browseState === 'pending' && username) {
+      users
+        .getBrowseStatus({ username })
+        .then((response) => {
+          this.setState({
+            browseStatus: response.data,
+          });
+        })
+        .catch((error) => {
+          // If we get a 404, the browse is likely complete or the user is offline
+          // Don't spam the console with these errors
+          if (error.response?.status !== 404) {
+            console.error('Browse status check failed:', error);
+          }
+        });
     }
   };
 
   getDirectoryTree = ({ directories, separator }) => {
-    if (directories.length === 0 || directories[0].name === undefined) {
+    // Safety checks for directories array
+    if (!Array.isArray(directories) || directories.length === 0) {
       return [];
     }
 
-    // Optimise this process so we only:
-    // - loop through all directories once
-    // - do the split once
-    // - future look ups are done from the Map
-    const depthMap = new Map();
-    for (const d of directories) {
-      const directoryDepth = d.name.split(separator).length;
-      if (!depthMap.has(directoryDepth)) {
-        depthMap.set(directoryDepth, []);
+    // Filter out any invalid directory objects
+    const validDirectories = directories.filter(
+      (d) => d && d.name && typeof d.name === 'string',
+    );
+
+    if (validDirectories.length === 0) {
+      return [];
+    }
+
+    // Sort directories by name for consistent ordering
+    validDirectories.sort((a, b) => a.name.localeCompare(b.name));
+
+    // For lazy loading, we want to show all directories but not pre-load their children
+    // Instead, we'll create a flat structure where each directory can be expanded on-demand
+    
+    // Group directories by their top-level path
+    const topLevelMap = new Map();
+    
+    for (const directory of validDirectories) {
+      const parts = directory.name.split(separator);
+      const topLevel = parts[0];
+      
+      if (!topLevelMap.has(topLevel)) {
+        topLevelMap.set(topLevel, []);
       }
-
-      depthMap.get(directoryDepth).push(d);
+      topLevelMap.get(topLevel).push(directory);
     }
+    
+    // Create the tree structure with lazy loading support
+    const tree = [];
+    
+    for (const [topLevel, dirs] of topLevelMap) {
+      // Find the directory that represents this top level
+      const topLevelDir = dirs.find(d => d.name === topLevel);
 
-    const depth = Math.min(...Array.from(depthMap.keys()));
-
-    return depthMap
-      .get(depth)
-      .map((directory) =>
-        this.getChildDirectories(depthMap, directory, separator, depth + 1),
-      );
-  };
-
-  getChildDirectories = (depthMap, root, separator, depth) => {
-    if (!depthMap.has(depth)) {
-      return { ...root, children: [] };
+      // Always allow lazy loading for top-level directories
+      tree.push({
+        ...topLevelDir,
+        hasChildren: true, // Always allow expansion
+        children: [], // Start with empty children - will be loaded on demand
+        childrenLoaded: false, // Flag to track if children have been loaded
+        loading: false, // Flag to show loading state
+      });
     }
-
-    const children = depthMap
-      .get(depth)
-      .filter((d) => d.name.startsWith(root.name));
-
-    return {
-      ...root,
-      children: children.map((c) =>
-        this.getChildDirectories(depthMap, c, separator, depth + 1),
-      ),
-    };
+    
+    return tree;
   };
 
   selectDirectory = (directory) => {
-    this.setState({ selectedDirectory: { ...directory, children: [] } }, () =>
-      this.saveState(),
-    );
+    console.log('Selecting directory:', {
+      name: directory.name,
+      hasChildren: directory.hasChildren,
+      childrenLoaded: directory.childrenLoaded,
+      childrenCount: directory.children ? directory.children.length : 0,
+    });
+
+    // Always fetch directory contents from API to get both files and subdirectories
+    console.log('Fetching directory contents from API for:', directory.name);
+      this.setState(
+      { selectedDirectory: { ...directory, children: [], loading: true } },
+        () => {
+          this.saveState();
+          this.fetchDirectoryContents(directory.name);
+        },
+      );
+  };
+
+  fetchDirectoryContents = async (directoryPath) => {
+    const { username } = this.state;
+    if (!username || !directoryPath) return;
+
+    console.log('Fetching directory contents for:', { username, directoryPath });
+
+    try {
+      // Use the directory-children endpoint instead, which we know works
+      const response = await users.getDirectoryChildren({
+        username,
+        parent: directoryPath,
+      });
+
+      console.log('Directory children response:', response);
+
+      if (response) {
+        const files = response.files || [];
+        const subdirectories = response.subdirectories || [];
+        
+        console.log('Extracted files:', files);
+        console.log('Extracted subdirectories:', subdirectories);
+        
+        this.setState((previousState) => ({
+          selectedDirectory: {
+            ...previousState.selectedDirectory,
+            files: files,
+            subdirectories: subdirectories.map(dir => ({
+              name: dir.name.split('\\').pop().split('/').pop(),
+              fullPath: dir.name,
+              fileCount: dir.fileCount || 0,
+            })),
+          },
+        }), () => {
+          console.log('Updated selectedDirectory:', this.state.selectedDirectory);
+        });
+      }
+    } catch (error) {
+      console.error('Failed to fetch directory contents:', error);
+    }
+  };
+
+  handleSelectSubdirectory = (subdirectory) => {
+    // Navigate to the subdirectory using the full path
+    const fullPath =
+      subdirectory.fullPath ||
+      `${this.state.selectedDirectory.name}${this.state.separator}${subdirectory.name}`;
+    this.fetchDirectoryContents(fullPath);
   };
 
   handleDeselectDirectory = () => {
     this.setState({ selectedDirectory: initialState.selectedDirectory }, () =>
       this.saveState(),
     );
+  };
+
+  triggerLazyLoadForDirectory = (directory) => {
+    // This method will be called when we need to trigger lazy loading for a selected directory
+    // We'll pass this to the DirectoryTree component
+    if (this.directoryTreeRef && this.directoryTreeRef.triggerLazyLoad) {
+      this.directoryTreeRef.triggerLazyLoad(directory);
+    }
+  };
+
+  handleTreeFilterChange = (e, { value }) => {
+    this.setState({ treeFilter: value });
   };
 
   render() {
@@ -242,6 +396,7 @@ class Browse extends Component {
       separator,
       tree,
       username,
+      treeFilter,
     } = this.state;
     const { locked, name } = selectedDirectory;
     const pending = browseState === 'pending';
@@ -256,8 +411,9 @@ class Browse extends Component {
     return (
       <div className="search-container">
         <Segment
+          basic
           className="browse-segment"
-          raised
+          style={{ borderRadius: '10px', marginBottom: '20px' }}
         >
           <div className="browse-segment-icon">
             <Icon
@@ -301,18 +457,68 @@ class Browse extends Component {
         ) : (
           <div>
             {browseError ? (
-              <span className="browse-error">Failed to browse {username}</span>
+              <div className="browse-error">
+                <Icon
+                  color="red"
+                  name="warning circle"
+                />
+                <span>
+                  {browseError.message || `Failed to browse ${username}`}
+                </span>
+                {browseError.originalError && (
+                  <div
+                    style={{
+                      color: '#666',
+                      fontSize: '0.9em',
+                      marginTop: '0.5em',
+                    }}
+                  >
+                    Try browsing a different user or check if the user is
+                    online.
+                  </div>
+                )}
+                <Button
+                  onClick={this.handleRetryBrowse}
+                  primary
+                  size="small"
+                  style={{ marginTop: '10px' }}
+                >
+                  <Icon name="refresh" />
+                  Retry Browse
+                </Button>
+              </div>
             ) : (
-              <div className="browse-container">
+              <div
+                className="browse-container"
+                style={{
+                  borderRadius: '10px',
+                  padding: '16px',
+                }}
+              >
                 {emptyTree ? (
-                  <PlaceholderSegment
-                    caption="User is not sharing any files"
-                    icon="folder open"
-                  />
+                  <div
+                    style={{
+                      alignItems: 'center',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'center',
+                      padding: '40px 0',
+                    }}
+                  >
+                    <Icon
+                      name="folder open"
+                      size="huge"
+                      style={{ marginBottom: 16 }}
+                    />
+                    <div style={{ fontSize: '1.2em' }}>
+                      No user share to display
+                    </div>
+                  </div>
                 ) : (
                   <Card
+                    basic
                     className="browse-tree-card"
-                    raised
+                    style={{ borderRadius: '10px' }}
                   >
                     <Card.Content>
                       <Card.Header>
@@ -328,11 +534,26 @@ class Browse extends Component {
                           {/* eslint-disable-line max-len */}
                         </span>
                       </Card.Meta>
-                      <Segment className="browse-folderlist">
+                      <Input
+                        fluid
+                        icon="filter"
+                        placeholder="Filter folders..."
+                        value={treeFilter}
+                        onChange={this.handleTreeFilterChange}
+                        style={{ marginBottom: 8, maxWidth: 350 }}
+                      />
+                      <Segment
+                        basic
+                        className="browse-folderlist"
+                        style={{ borderRadius: '10px' }}
+                      >
                         <DirectoryTree
+                          ref={(ref) => (this.directoryTreeRef = ref)}
                           onSelect={(_, value) => this.selectDirectory(value)}
                           selectedDirectoryName={name}
                           tree={tree}
+                          username={username}
+                          filter={treeFilter}
                         />
                       </Segment>
                     </Card.Content>
@@ -345,6 +566,9 @@ class Browse extends Component {
                     marginTop={-20}
                     name={name}
                     onClose={this.handleDeselectDirectory}
+                    onSelectSubdirectory={this.handleSelectSubdirectory}
+                    separator={separator}
+                    subdirectories={selectedDirectory.subdirectories || []}
                     username={username}
                   />
                 )}

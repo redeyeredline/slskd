@@ -6,7 +6,7 @@
 
 .browse-segment-icon {
   padding-top: 10px;
-  padding-right: .5em;
+  padding-right: 0.5em;
 }
 
 .browse-results {
@@ -14,10 +14,22 @@
 }
 
 .browse-error {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   text-align: center;
   font-size: 18px;
   margin-top: 50px;
+  padding: 20px;
+  background-color: #fff6f6;
+  border: 1px solid #e0b4b4;
+  border-radius: 4px;
+  color: #9f3a38;
+}
+
+.browse-error .icon {
+  margin-bottom: 10px;
+  font-size: 24px;
 }
 
 .browse-results-row {
@@ -25,15 +37,16 @@
 }
 
 .browse-results-row:last-child {
-  padding-bottom: 0px !important;  
+  padding-bottom: 0px !important;
 }
 
 .browse-folderlist {
   width: 100% !important;
   white-space: pre;
   overflow: auto !important;
-  max-height: 400px;
-  padding: 1em !important;
+  max-height: 90vh;
+  min-height: 75vh;
+  padding: 0.25em 0.25em 0.25em 0.25em !important;
   box-shadow: unset !important;
 }
 
@@ -44,11 +57,15 @@
 
 .browse-folderlist-header {
   cursor: pointer;
-  margin-left: 3px !important;
+  margin-left: 2px !important;
+  font-size: 13px !important;
+  padding: 0 !important;
 }
 
 .browse-folderlist-icon {
   float: left;
+  margin-right: 4px !important;
+  font-size: 15px !important;
 }
 
 .browse-filelist {
@@ -56,18 +73,29 @@
   padding: 1em !important;
 }
 
-.ui.list .list, ol.ui.list ol, ul.ui.list ul {
+.ui.list .list,
+ol.ui.list ol,
+ul.ui.list ul {
   padding-left: 0px !important;
   padding-top: 3px !important;
   padding-bottom: 0px !important;
 }
 
-.ui.list .list>.item>.icon+.content, .ui.list .list>.item>.image+.content, .ui.list>.item>.icon+.content, .ui.list>.item>.image+.content {
+.ui.list .list > .item > .icon + .content,
+.ui.list .list > .item > .image + .content,
+.ui.list > .item > .icon + .content,
+.ui.list > .item > .image + .content {
   padding-left: 0px !important;
 }
 
 .browse-tree-card {
   width: 100% !important;
+  min-height: 75vh;
+  max-height: 90vh;
+}
+
+.browse-container {
+  min-height: 700px;
 }
 
 .browse-container:last-child {
@@ -100,4 +128,34 @@
 
 .browse-folderlist-icon.selected {
   color: var(--slskd-browse-folderlist-header-selected-color) !important;
+}
+
+/* Collapsible folder styles */
+.browse-folderlist-item {
+  transition: background-color 0.2s ease;
+  padding-top: 0px !important;
+  padding-bottom: 0px !important;
+  margin-top: 0px !important;
+  margin-bottom: 0px !important;
+  font-size: 12px !important;
+  line-height: 1.1 !important;
+}
+
+.browse-folderlist-item:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.browse-folderlist-item .chevron {
+  transition: transform 0.2s ease;
+}
+
+.browse-folderlist-item .chevron:hover {
+  color: var(--slskd-browse-folderlist-header-selected-color) !important;
+}
+
+.browse-folderlist-item .folder-count {
+  font-size: 12px;
+  color: #666;
+  margin-left: auto;
+  opacity: 0.7;
 }
