@@ -27,3 +27,11 @@ export const getDirectoryContents = async ({ username, directory }) => {
     })
   ).data;
 };
+
+export const getDirectoryChildren = async ({ username, parent }) => {
+  return (
+    await api.get(`/users/${encodeURIComponent(username)}/directory-children`, {
+      params: { parent },
+    })
+  ).data;
+};

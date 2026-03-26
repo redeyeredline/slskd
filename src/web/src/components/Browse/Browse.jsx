@@ -23,8 +23,8 @@ const initialState = {
   selectedFiles: [],
   separator: '\\',
   tree: [],
-  username: '',
   treeFilter: '',
+  username: '',
 };
 
 class Browse extends Component {
@@ -111,9 +111,12 @@ class Browse extends Component {
             }, 0);
 
             const lockedDirectoryCount = lockedDirectories.length;
-            const lockedFileCount = lockedDirectories.reduce((accumulator, directory) => {
-              return accumulator + (directory.fileCount || 0);
-            }, 0);
+            const lockedFileCount = lockedDirectories.reduce(
+              (accumulator, directory) => {
+                return accumulator + (directory.fileCount || 0);
+              },
+              0,
+            );
 
             // Create a lazy-loading tree structure
             const tree = this.getDirectoryTree({ directories, separator });
@@ -121,14 +124,14 @@ class Browse extends Component {
             this.setState(
               {
                 browseState: 'complete',
-              info: {
-                directories: directoryCount,
-                files: fileCount,
-                lockedDirectories: lockedDirectoryCount,
-                lockedFiles: lockedFileCount,
-              },
-              separator,
-              tree,
+                info: {
+                  directories: directoryCount,
+                  files: fileCount,
+                  lockedDirectories: lockedDirectoryCount,
+                  lockedFiles: lockedFileCount,
+                },
+                separator,
+                tree,
               },
               () => this.saveState(),
             );
@@ -139,7 +142,7 @@ class Browse extends Component {
             // Enhanced error handling for massive users
             let errorMessage = error.message || `Failed to browse ${username}`;
             let originalError = null;
-            
+
             if (error.response && error.response.status) {
               // Server responded with an error
               if (error.response.status === 408) {
@@ -151,6 +154,7 @@ class Browse extends Component {
               } else {
                 errorMessage = error.response.data || errorMessage;
               }
+
               originalError = error;
             } else if (error.request) {
               // Request was made but no response received
@@ -266,70 +270,76 @@ class Browse extends Component {
 
     // For lazy loading, we want to show all directories but not pre-load their children
     // Instead, we'll create a flat structure where each directory can be expanded on-demand
-    
+
     // Group directories by their top-level path
     const topLevelMap = new Map();
-    
+
     for (const directory of validDirectories) {
       const parts = directory.name.split(separator);
       const topLevel = parts[0];
-      
+
       if (!topLevelMap.has(topLevel)) {
         topLevelMap.set(topLevel, []);
       }
+
       topLevelMap.get(topLevel).push(directory);
     }
-    
+
     // Create the tree structure with lazy loading support
     const tree = [];
-    
-    for (const [topLevel, dirs] of topLevelMap) {
+
+    for (const [topLevel, directories_] of topLevelMap) {
       // Find the directory that represents this top level
-      const topLevelDir = dirs.find(d => d.name === topLevel);
+      const topLevelDir = directories_.find((d) => d.name === topLevel);
 
       // Always allow lazy loading for top-level directories
       tree.push({
         ...topLevelDir,
-        hasChildren: true, // Always allow expansion
-        children: [], // Start with empty children - will be loaded on demand
-        childrenLoaded: false, // Flag to track if children have been loaded
+        // Always allow expansion
+        children: [],
+        // Start with empty children - will be loaded on demand
+        childrenLoaded: false,
+        hasChildren: true, // Flag to track if children have been loaded
         loading: false, // Flag to show loading state
       });
     }
-    
+
     return tree;
   };
 
   selectDirectory = (directory) => {
     console.log('Selecting directory:', {
-      name: directory.name,
-      hasChildren: directory.hasChildren,
-      childrenLoaded: directory.childrenLoaded,
       childrenCount: directory.children ? directory.children.length : 0,
+      childrenLoaded: directory.childrenLoaded,
+      hasChildren: directory.hasChildren,
+      name: directory.name,
     });
 
     // Always fetch directory contents from API to get both files and subdirectories
     console.log('Fetching directory contents from API for:', directory.name);
-      this.setState(
+    this.setState(
       { selectedDirectory: { ...directory, children: [], loading: true } },
-        () => {
-          this.saveState();
-          this.fetchDirectoryContents(directory.name);
-        },
-      );
+      () => {
+        this.saveState();
+        this.fetchDirectoryContents(directory.name);
+      },
+    );
   };
 
   fetchDirectoryContents = async (directoryPath) => {
     const { username } = this.state;
     if (!username || !directoryPath) return;
 
-    console.log('Fetching directory contents for:', { username, directoryPath });
+    console.log('Fetching directory contents for:', {
+      directoryPath,
+      username,
+    });
 
     try {
       // Use the directory-children endpoint instead, which we know works
       const response = await users.getDirectoryChildren({
-        username,
         parent: directoryPath,
+        username,
       });
 
       console.log('Directory children response:', response);
@@ -337,23 +347,29 @@ class Browse extends Component {
       if (response) {
         const files = response.files || [];
         const subdirectories = response.subdirectories || [];
-        
+
         console.log('Extracted files:', files);
         console.log('Extracted subdirectories:', subdirectories);
-        
-        this.setState((previousState) => ({
-          selectedDirectory: {
-            ...previousState.selectedDirectory,
-            files: files,
-            subdirectories: subdirectories.map(dir => ({
-              name: dir.name.split('\\').pop().split('/').pop(),
-              fullPath: dir.name,
-              fileCount: dir.fileCount || 0,
-            })),
+
+        this.setState(
+          (previousState) => ({
+            selectedDirectory: {
+              ...previousState.selectedDirectory,
+              files,
+              subdirectories: subdirectories.map((dir) => ({
+                fileCount: dir.fileCount || 0,
+                fullPath: dir.name,
+                name: dir.name.split('\\').pop().split('/').pop(),
+              })),
+            },
+          }),
+          () => {
+            console.log(
+              'Updated selectedDirectory:',
+              this.state.selectedDirectory,
+            );
           },
-        }), () => {
-          console.log('Updated selectedDirectory:', this.state.selectedDirectory);
-        });
+        );
       }
     } catch (error) {
       console.error('Failed to fetch directory contents:', error);
@@ -395,8 +411,8 @@ class Browse extends Component {
       selectedDirectory,
       separator,
       tree,
-      username,
       treeFilter,
+      username,
     } = this.state;
     const { locked, name } = selectedDirectory;
     const pending = browseState === 'pending';
@@ -537,10 +553,10 @@ class Browse extends Component {
                       <Input
                         fluid
                         icon="filter"
-                        placeholder="Filter folders..."
-                        value={treeFilter}
                         onChange={this.handleTreeFilterChange}
+                        placeholder="Filter folders..."
                         style={{ marginBottom: 8, maxWidth: 350 }}
+                        value={treeFilter}
                       />
                       <Segment
                         basic
@@ -548,12 +564,12 @@ class Browse extends Component {
                         style={{ borderRadius: '10px' }}
                       >
                         <DirectoryTree
-                          ref={(ref) => (this.directoryTreeRef = ref)}
+                          filter={treeFilter}
                           onSelect={(_, value) => this.selectDirectory(value)}
+                          ref={(ref) => (this.directoryTreeRef = ref)}
                           selectedDirectoryName={name}
                           tree={tree}
                           username={username}
-                          filter={treeFilter}
                         />
                       </Segment>
                     </Card.Content>

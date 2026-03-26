@@ -1,8 +1,8 @@
-import * as transfers from "../../lib/transfers";
-import TransferList from "./TransferList";
-import React, { Component } from "react";
-import { Button, Card, Icon } from "semantic-ui-react";
-import { withRouter } from "react-router-dom";
+import * as transfers from '../../lib/transfers';
+import TransferList from './TransferList';
+import React, { Component } from 'react';
+import { withRouter } from 'react-router-dom';
+import { Button, Card, Icon } from 'semantic-ui-react';
 
 class TransferGroup extends Component {
   constructor(props) {
@@ -108,11 +108,11 @@ class TransferGroup extends Component {
   };
 
   render() {
-    const { direction, user, history } = this.props;
+    const { direction, history, user } = this.props;
     const { isFolded } = this.state;
 
     const selected = this.getSelectedFiles();
-    const all = selected.length > 1 ? " Selected" : "";
+    const all = selected.length > 1 ? ' Selected' : '';
 
     const allRetryable =
       selected.filter((f) => transfers.isStateRetryable(f.state)).length ===
@@ -125,35 +125,39 @@ class TransferGroup extends Component {
       selected.length;
 
     const handleUsernameClick = () => {
-      history.push("/browse", { user: user.username });
+      history.push('/browse', { user: user.username });
     };
 
     return (
-      <Card className="transfer-card" key={user.username} raised>
+      <Card
+        className="transfer-card"
+        key={user.username}
+        raised
+      >
         <Card.Content>
           <Card.Header>
             <Icon
               link
-              name={isFolded ? "chevron right" : "chevron down"}
+              name={isFolded ? 'chevron right' : 'chevron down'}
               onClick={() => this.toggleFolded()}
             />
             <button
               className="clickable-username"
               onClick={handleUsernameClick}
               style={{
-                background: "none",
-                border: "none",
-                color: "#2185d0",
-                cursor: "pointer",
-                font: "inherit",
-                padding: 0,
-                textDecoration: "underline",
+                background: 'none',
+                border: 'none',
+                color: '#2185d0',
+                cursor: 'pointer',
+                font: 'inherit',
                 marginLeft: 8,
+                padding: 0,
+                textDecoration: 'underline',
               }}
               title="Click to browse this user's files"
               type="button"
             >
-            {user.username}
+              {user.username}
             </button>
           </Card.Header>
           {user.directories &&

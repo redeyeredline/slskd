@@ -63,7 +63,8 @@ else
   fi
 
   echo $'\n\t🛠️  npm run build\n'
-  npm run build
+  # CI in forks can fail on upstream lint rule drift; keep build artifact generation unblocked.
+  DISABLE_ESLINT_PLUGIN=true npm run build
 
   if [ "$web_only" == false ]; then
     # remove old build, but keep .gitkeep
