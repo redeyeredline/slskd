@@ -16,6 +16,8 @@ concurrency:
 
 jobs:
   mirror:
+    # Upstream-only mirror job. Forks do not have mirror SSH credentials/targets.
+    if: github.repository_owner == 'slskd' && github.event.repository.fork == false
     runs-on: ubuntu-latest
     strategy:
       matrix:
