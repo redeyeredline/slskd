@@ -1,4 +1,4 @@
-﻿// <copyright file="DirectoryContentsRequest.cs" company="slskd Team">
+// <copyright file="DirectoryContentsRequest.cs" company="slskd Team">
 //     Copyright (c) slskd Team. All rights reserved.
 //
 //     This program is free software: you can redistribute it and/or modify
@@ -15,7 +15,7 @@
 //     along with this program.  If not, see https://www.gnu.org/licenses/.
 // </copyright>
 
-namespace slskd.Users.API
+namespace slskd.Users.API.DTO
 {
     public class DirectoryContentsRequest
     {
