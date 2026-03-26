@@ -1,4 +1,4 @@
-﻿// <copyright file="UsersController.cs" company="slskd Team">
+// <copyright file="UsersController.cs" company="slskd Team">
 //     Copyright (c) slskd Team. All rights reserved.
 //
 //     This program is free software: you can redistribute it and/or modify
@@ -147,7 +147,7 @@ namespace slskd.Users.API
         {
             DirectoryCache.TryRemove(username, out _);
             Log.Information("[DirectoryCache] Cache cleared for user {Username}", username);
-            
+
             // Trigger a fresh browse and cache build
             return await Browse(username);
         }
@@ -245,18 +245,18 @@ namespace slskd.Users.API
             {
                 var browseResponse = await Client.BrowseAsync(username);
                 var result = browseResponse.Directories;
-                
+
                 // Filter directories if search term is provided
                 var filteredDirectories = result;
                 if (!string.IsNullOrEmpty(search))
                 {
-                    filteredDirectories = result.Where(d => 
+                    filteredDirectories = result.Where(d =>
                         d.Name.Contains(search, StringComparison.OrdinalIgnoreCase)).ToList();
                 }
 
                 var totalCount = filteredDirectories.Count();
                 var totalPages = (int)System.Math.Ceiling((double)totalCount / pageSize);
-                
+
                 var pagedDirectories = filteredDirectories
                     .Skip((page - 1) * pageSize)
                     .Take(pageSize)
@@ -336,7 +336,7 @@ namespace slskd.Users.API
             try
             {
                 Log.Debug("Fetching directory contents for user {User} directory '{Directory}'", username, request.Directory);
-                
+
                 using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(60000)); // 60 second timeout
                 var result = await Client.GetDirectoryContentsAsync(username, request.Directory)
                     .WaitAsync(cts.Token);
@@ -421,13 +421,13 @@ namespace slskd.Users.API
                 var filteredFiles = directoryResult.Files;
                 if (!string.IsNullOrEmpty(search))
                 {
-                    filteredFiles = directoryResult.Files.Where(f => 
+                    filteredFiles = directoryResult.Files.Where(f =>
                         f.Filename.Contains(search, StringComparison.OrdinalIgnoreCase)).ToList();
                 }
 
                 var totalCount = filteredFiles.Count();
                 var totalPages = (int)System.Math.Ceiling((double)totalCount / pageSize);
-                
+
                 var pagedFiles = filteredFiles
                     .Skip((page - 1) * pageSize)
                     .Take(pageSize)
@@ -444,7 +444,7 @@ namespace slskd.Users.API
                     HasPreviousPage = page > 1,
                 };
 
-                Log.Debug("{Endpoint} paginated response from {User} for directory '{Directory}': {FileCount} files, page {Page}/{TotalPages}", 
+                Log.Debug("{Endpoint} paginated response from {User} for directory '{Directory}': {FileCount} files, page {Page}/{TotalPages}",
                     nameof(DirectoryPaginated), username, directory, pagedFiles.Count, page, totalPages);
 
                 return Ok(response);
@@ -490,7 +490,7 @@ namespace slskd.Users.API
                 if (!DirectoryCache.TryGetValue(username, out var allDirs))
                 {
                     Log.Warning("[DirectoryCache] Cache miss for user {Username}. Triggering cache build.", username);
-                    
+
                     // Trigger cache build
                     await Browse(username);
                     return StatusCode(202, "Directory cache is being built. Please retry shortly.");
@@ -519,7 +519,7 @@ namespace slskd.Users.API
 
                 // Find files in the parent directory
                 var parentDir = allDirs.FirstOrDefault(d => d.Name == parent);
-                var files = parentDir?.Files ?? new List<Soulseek.File>();
+                var files = parentDir?.Files?.ToList() ?? new List<Soulseek.File>();
 
                 var response = new DirectoryChildrenResponse
                 {
